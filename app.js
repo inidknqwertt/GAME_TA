@@ -14,7 +14,10 @@ const db = mysql.createConnection({
     user: 'root',
     password: 'NrtUjwvBwDRuVUQqQjksMucKCMUnZKCP',
     database: 'railway',
-    port: 47016
+    port: 47016,
+    ssl: {
+        rejectUnauthorized: true
+    }
 });
 
 // koneksi database
