@@ -210,9 +210,9 @@
                     </p>
 
                     <!-- VIDEO TAMBAHAN -->
-                    <video controls playsinline width="100%">
-                        <source src="/Materi/diri/Diri.mp4" type="video/mp4">
-                    </video>
+                    <iframe width="100%" height="400" src="https://www.youtube.com/embed/eceAdxsn7w4" frameborder="0"
+                        allowfullscreen>
+                    </iframe>
 
                 </div>
             </section>
@@ -253,22 +253,6 @@
 
         showSlide(currentSlide);
 
-        // PAUSE BACKSOUND SAAT VIDEO DIPUTAR
-        const video = document.querySelector('video');
-
-        if (video) {
-            video.addEventListener('play', () => {
-                if (window.pauseBGM) pauseBGM();
-            });
-
-            video.addEventListener('pause', () => {
-                if (window.resumeBGM) resumeBGM();
-            });
-
-            video.addEventListener('ended', () => {
-                if (window.resumeBGM) resumeBGM();
-            });
-        }
     </script>
 
 </body>
