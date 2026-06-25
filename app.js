@@ -16,7 +16,7 @@ const db = mysql.createConnection({
     database: 'railway',
     port: 47016,
     ssl: {
-        rejectUnauthorized: true
+        rejectUnauthorized: false
     }
 });
 
