@@ -69,6 +69,13 @@ function isLogin(req, res, next) {
     }
 }
 
+/* =========================
+   HEALTH CHECK (untuk Railway)
+========================= */
+app.get('/health', (req, res) => {
+    res.status(200).send('OK');
+});
+
 // --- ROUTES ---
 // Halaman Home (Hanya bisa diakses kalau sudah login)
 // app.get() = route GET untuk membuka halaman
