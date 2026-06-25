@@ -10,10 +10,11 @@ const app = express(); // untuk menjalankan web Express
 
 /* koneksi ke MySQL */
 const db = mysql.createConnection({
-    host: 'mysql.railway.internal',
+    host: 'thomas.proxy.rlwy.net',
     user: 'root',
     password: 'NrtUjwvBwDRuVUQqQjksMucKCMUnZKCP',
-    database: 'railway'
+    database: 'railway',
+    port: 47016
 });
 
 // koneksi database
