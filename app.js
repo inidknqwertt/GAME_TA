@@ -10,10 +10,10 @@ const app = express(); // untuk menjalankan web Express
 
 /* koneksi ke MySQL */
 const db = mysql.createConnection({
-    host: 'localhost',
+    host: 'mysql.railway.internal',
     user: 'root',
-    password: '',
-    database: 'node_auth'
+    password: 'NrtUjwvBwDRuVUQqQjksMucKCMUnZKCP',
+    database: 'railway'
 });
 
 // koneksi database
