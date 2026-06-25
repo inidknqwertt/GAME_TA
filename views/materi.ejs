@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Materi</title>
+
+    <!-- RESPONSIVE -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+
+    <!-- =========================
+         BACKGROUND
+    ========================= -->
+    <div class="background"></div>
+
+    <!-- =========================
+         USER INFO
+    ========================= -->
+    <div class="user-info">
+        👤 <%= user.username %>
+    </div>
+
+    <audio id="bgm" autoplay loop>
+        <source src="/audio/backsound.mp3" type="audio/mpeg">
+    </audio>
+
+    <script src="/js/audioManager.js"></script>
+
+    <!--main, Menandai konten utama halaman-->
+    <main class="container">
+        <div class="content">
+
+            <!-- JUDUL -->
+            <h1 class="menu-title">Let’s go Membaca!</h1>
+
+            <!-- MENU -->
+            <div class="menu">
+                <a href="/materi/diri">
+                    <button type="button">Pembinaan Diri</button>
+                </a>
+
+                <a href="/materi/sosial">
+                    <button type="button">Pembinaan Sosial</button>
+                </a>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- =========================
+         KARAKTER
+    ========================= -->
+    <div class="character">
+        <img src="/CharMaterii.gif" alt="Karakter">
+    </div>
+
+    <!-- =========================
+         BACK BUTTON
+    ========================= -->
+    <a href="/" class="back-icon">
+        <img src="/back.png" alt="Kembali">
+    </a>
+
+</body>
+
+</html>

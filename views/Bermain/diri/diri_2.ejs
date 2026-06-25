@@ -1,0 +1,1514 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Pengaturan karakter encoding -->
+  <meta charset="UTF-8">
+
+  <!-- Agar tampilan responsive di mobile -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Judul halaman -->
+  <title>level 2 - Diri</title>
+
+  <!-- Menghubungkan file CSS -->
+  <link rel="stylesheet" href="/diri_2.css">
+</head>
+
+<body>
+
+  <!-- Background utama game -->
+  <div class="background"></div>
+
+  <!-- Menampilkan username player -->
+  <div class="user-info">
+    👤 <%= user.username %>
+  </div>
+
+  <!-- POINT -->
+  <div class="point-box">
+    ⭐ <span id="point">0</span> / 2000
+  </div>
+
+  <!-- BUTTON PETUNJUK -->
+  <button id="openGuide" class="guide-btn" onclick="openGuide()">
+    Petunjuk 🎮
+  </button>
+
+  <!-- CARD PETUNJUK -->
+  <div id="guideCard" class="guide-card hidden">
+
+    <button class="guide-back" onclick="closeGuide()">
+      ⬅
+    </button>
+
+    <h3>📖 Petunjuk Permainan</h3>
+
+    <ul>
+      <li>Klik tombol kanan dan kiri untuk bergerak.</li>
+      <li>Klik tombol atas untuk lompat dan menghindari musuh.</li>
+      <li>Hindari musuh agar tidak kalah.</li>
+      <li>Jika jatuh ke bawah atau terkena musuh maka nyawa player failed.</li>
+      <li>Kumpulkan semua item untuk ke garis finish.</li>
+      <li>Capai garis finish untuk lanjut ke level berikutnya 🚀</li>
+    </ul>
+
+  </div>
+
+  <!-- Container utama game -->
+  <div id="game-container">
+
+    <!-- Dunia game tempat semua object berada -->
+    <div id="game-world">
+
+      <!-- Semua elemen game dibuat melalui JavaScript -->
+    </div>
+
+    <!-- Karakter player -->
+    <div id="character">
+      <div id="character-sprite"></div>
+    </div>
+
+    <!-- Informasi instruksi game -->
+    <div id="point-container">
+      <span> Silahkan Kumpulkan sikap Muhasabah, Taubat, Maaf, Janji, dan Berakhlak Baik!</span>
+    </div>
+
+    <!-- Tampilan saat player failed -->
+    <div id="player-failed">
+      <div>YAH, KAMU TERKENA MUSUH</div>
+      <button class="restart-btn">Coba Lagi</button>
+    </div>
+
+    <!-- Tampilan saat menang -->
+    <div id="game-win"></div>
+  </div>
+
+  <!-- Tombol kontrol mobile -->
+  <div id="controls">
+    <div class="control-btn" id="left-btn"></div>
+    <div class="control-btn" id="jump-btn"></div>
+    <div class="control-btn" id="right-btn"></div>
+  </div>
+
+  <!-- Tombol kembali -->
+  <a href="/level/diri" id="backButton">
+    <img src="/back.png" alt="Back" />
+  </a>
+
+  <audio id="bgm" autoplay loop>
+    <source src="/audio/backsound.mp3" type="audio/mpeg">
+  </audio>
+
+  <script src="/js/audioManager.js"></script>
+
+  <script>
+
+    /* =========================================================
+       MENGAMBIL ELEMEN HTML
+    ========================================================= */
+
+    // Karakter player
+    const character = document.getElementById('character');
+
+    // Sprite karakter
+    const characterSprite = document.getElementById('character-sprite');
+
+    // Container game
+    const gameContainer = document.getElementById('game-container');
+
+    // Dunia game
+    const gameWorld = document.getElementById('game-world');
+
+    // Tampilan player failed
+    const playerFailedElement = document.getElementById('player-failed');
+
+    // Tampilan menang
+    const gameWinElement = document.getElementById('game-win');
+
+
+    /* =========================================================
+       TOMBOL KONTROL
+    ========================================================= */
+
+    const leftBtn = document.getElementById('left-btn');
+    const rightBtn = document.getElementById('right-btn');
+    const jumpBtn = document.getElementById('jump-btn');
+
+    // Tombol restart
+    const restartBtns = document.querySelectorAll('.restart-btn');
+
+
+    /* =========================================================
+       SOUND EFFECT
+    ========================================================= */
+
+    // Sound untuk setiap item pembinaan diri
+    const pembinaanDiriSounds = {
+      'Muhasabah': new Audio('/Bermain/diri/dua/muhasabah.mp3'),
+      'Taubat': new Audio('/Bermain/diri/dua/taubat.mp3'),
+      'Maaf': new Audio('/Bermain/diri/dua/maaf.mp3'),
+      'Janji': new Audio('/Bermain/diri/dua/janji.mp3'),
+      'Berakhlak Baik': new Audio('/Bermain/diri/dua/berakhlak-baik.mp3')
+    };
+
+    // Sound salah
+    const wrongSound = new Audio('/Bermain/diri/dua/salah.mp3');
+
+    // Sound menang
+    const winSound = new Audio('/Bermain/diri/dua/Kemenangan.mp3');
+
+    // Sound jatuh
+    const fallSound = new Audio('/Bermain/diri/dua/salah.mp3');
+
+
+    /* =========================================================
+       DATA ITEM PEMBINAAN DIRI
+    ========================================================= */
+
+    const pembinaanDiriTypes = [
+
+      // Item Muhasabah
+      { type: 'Muhasabah', image: '/Bermain/diri/dua/muhasabah.png' },
+
+      // Item Taubat
+      { type: 'Taubat', image: '/Bermain/diri/dua/taubat.png' },
+
+      // Item Maaf
+      { type: 'Maaf', image: '/Bermain/diri/dua/maaf.png' },
+
+      // Item Janji
+      { type: 'Janji', image: '/Bermain/diri/dua/janji.png' },
+
+      // Item Berakhlak Baik
+      { type: 'Berakhlak Baik', image: '/Bermain/diri/dua/berakhlak-baik.png' }
+    ];
+
+
+    /* =========================================================
+       VARIABLE GAME
+    ========================================================= */
+
+    // Status lompat
+    let isJumping = false;
+
+    // Status player failed
+    let playerFailed = false;
+
+    // Item yang berhasil dikumpulkan
+    let collectedPembinaanDiri = [];
+
+    // Posisi horizontal karakter
+    let characterLeft = 50;
+
+    // Posisi vertikal karakter
+    let characterBottom = 0;
+
+    // Gaya gravitasi
+    let gravity = 0.9;
+
+    // Tinggi lompatan
+    let jumpHeight = 15;
+
+    // Jumlah lompatan
+    let jumpCount = 0;
+
+    // Kecepatan vertikal
+    let velocityY = 0;
+
+    // Bergerak kiri
+    let isMovingLeft = false;
+
+    // Bergerak kanan
+    let isMovingRight = false;
+
+    // Kecepatan game
+    let gameSpeed = 2;
+
+    // Array platform
+    let platforms = [];
+
+    // Array item pembinaan diri
+    let pembinaanDiriItems = [];
+
+    // Array musuh
+    let enemies = [];
+
+    // Array pipa
+    let pipes = [];
+
+    // Array awan
+    let clouds = [];
+
+    // Garis finish
+    let finishLine = null;
+
+    // ID animasi game
+    let gameAnimationId;
+
+    // Posisi platform terakhir
+    let lastPlatformPosition = 300;
+
+    // Arah karakter
+    let characterDirection = 1;
+
+    // Panjang map game
+    let mapLength = 2400;
+
+    // Posisi kamera dunia game
+    let worldOffset = 0;
+
+    // Lebar tampilan game
+    let viewWidth = 800;
+
+    // Status apakah sebelumnya di platform
+    let lastOnPlatform = false;
+
+    // Waktu sejak jatuh dari platform
+    let timeSinceOffPlatform = 0;
+
+
+    /* =========================================================
+       DIMENSI GAME
+    ========================================================= */
+
+    const gameWidth = 800;
+    const gameHeight = 400;
+
+    // Ukuran karakter
+    const characterWidth = 50;
+    const characterHeight = 50;
+
+    // Batas jatuh hingga mati
+    const FALL_DEATH_THRESHOLD = 150;
+
+
+    /* =========================================================
+       FUNGSI INIT GAME
+    ========================================================= */
+
+    function init() {
+
+      // Reset semua variable game
+      isJumping = false;
+      playerFailed = false;
+
+      // Kosongkan item yang dikumpulkan
+      collectedPembinaanDiri = [];
+
+      // Posisi awal karakter
+      characterLeft = 50;
+      characterBottom = 0;
+
+      // Reset gravitasi vertikal
+      velocityY = 0;
+
+      // Reset kamera
+      worldOffset = 0;
+
+      // Reset status platform
+      lastOnPlatform = false;
+      timeSinceOffPlatform = 0;
+
+      // Sembunyikan playerFailed
+      playerFailedElement.style.display = 'none';
+
+      // Sembunyikan game win
+      gameWinElement.style.display = 'none';
+
+      // Reset posisi dunia game
+      gameWorld.style.transform = `translateX(0px)`;
+
+
+      /* =====================================
+         MEMBERSIHKAN ARRAY
+      ===================================== */
+
+      platforms = [];
+      pembinaanDiriItems = [];
+      enemies = [];
+      pipes = [];
+      clouds = [];
+
+
+      /* =====================================
+         MENGHAPUS ELEMEN LAMA
+      ===================================== */
+
+      while (gameWorld.firstChild) {
+        gameWorld.removeChild(gameWorld.firstChild);
+      }
+
+
+      /* =====================================
+         MEMBUAT PLATFORM Pijakan
+      ===================================== */
+
+      createPlatform(0, 0, 300, 40);
+      createPlatform(350, 70, 150, 40);
+      createPlatform(600, 120, 180, 40);
+      createPlatform(850, 70, 150, 40);
+      createPlatform(1100, 120, 180, 40);
+      createPlatform(1350, 70, 150, 40);
+      createPlatform(1600, 120, 180, 40);
+      createPlatform(1850, 70, 150, 40);
+      createPlatform(2100, 0, 300, 40);
+
+
+      /* =====================================
+         PLATFORM TAMBAHAN
+      ===================================== */
+
+      createPlatform(400, 170, 100, 40);
+      createPlatform(700, 220, 100, 40);
+      createPlatform(1000, 170, 100, 40);
+      createPlatform(1300, 220, 100, 40);
+      createPlatform(1600, 170, 100, 40);
+      createPlatform(1900, 220, 100, 40);
+
+
+      /* =====================================
+         PLATFORM KECIL
+      ===================================== */
+
+      createPlatform(250, 120, 80, 40);
+      createPlatform(500, 250, 80, 40);
+      createPlatform(800, 150, 80, 40);
+      createPlatform(1200, 250, 80, 40);
+      createPlatform(1500, 200, 80, 40);
+      createPlatform(1750, 150, 80, 40);
+
+
+      /* =====================================
+         MEMBUAT ITEM PEMBINAAN DIRI
+      ===================================== */
+
+      createPembinaanDiri(400, 220, pembinaanDiriTypes[0].type, pembinaanDiriTypes[0].image);
+
+      createPembinaanDiri(750, 270, pembinaanDiriTypes[1].type, pembinaanDiriTypes[1].image);
+
+      createPembinaanDiri(1000, 220, pembinaanDiriTypes[2].type, pembinaanDiriTypes[2].image);
+
+      createPembinaanDiri(1400, 270, pembinaanDiriTypes[3].type, pembinaanDiriTypes[3].image);
+
+      createPembinaanDiri(1800, 120, pembinaanDiriTypes[4].type, pembinaanDiriTypes[4].image);
+
+
+      /* =====================================
+         MEMBUAT MUSUH
+      ===================================== */
+
+      createEnemyOnPlatform(850, 70, 150);
+      createEnemyOnPlatform(1350, 70, 150);
+      createEnemyOnPlatform(1850, 70, 150);
+
+      createEnemyOnPlatform(1000, 170, 100);
+      createEnemyOnPlatform(1600, 170, 100);
+
+      createEnemyOnPlatform(800, 150, 80);
+      createEnemyOnPlatform(1500, 200, 80);
+
+      createEnemyOnPlatform(2100, 0, 300);
+
+
+      /* =====================================
+         GARIS FINISH
+      ===================================== */
+
+      createFinishLine(2250);
+
+
+      /* =====================================
+         MEMBUAT AWAN
+      ===================================== */
+
+      for (let i = 0; i < 10; i++) {
+
+        const left = Math.random() * mapLength;
+        const top = Math.random() * (gameHeight / 3);
+
+        createCloud(left, top);
+      }
+
+
+      /* =====================================
+         POSISI AWAL KARAKTER
+      ===================================== */
+
+      character.style.left = characterLeft + 'px';
+      character.style.bottom = characterBottom + 'px';
+
+
+      /* =====================================
+         MEMULAI GAME LOOP
+      ===================================== */
+
+      if (gameAnimationId) {
+        cancelAnimationFrame(gameAnimationId);
+      }
+
+      gameLoop();
+    }
+
+    // Fungsi untuk membuat platform baru
+    function createPlatform(left, bottom, width, height) {
+
+      // Membuat elemen HTML <div>
+      const platform = document.createElement('div');
+
+      // Menambahkan class CSS "platform"
+      platform.classList.add('platform');
+
+      // Mengatur posisi horizontal platform
+      platform.style.left = left + 'px';
+
+      // Mengatur posisi vertikal platform dari bawah
+      platform.style.bottom = bottom + 'px';
+
+      // Mengatur lebar platform
+      platform.style.width = width + 'px';
+
+      // Mengatur tinggi platform
+      platform.style.height = height + 'px';
+
+      // Menambahkan platform ke area game
+      gameWorld.appendChild(platform);
+
+      // Menyimpan data platform ke array platforms
+      platforms.push({
+        left,
+        bottom,
+        width,
+        height,
+        element: platform
+      });
+
+      // Menyimpan posisi platform paling kanan
+      // Berguna untuk generate platform berikutnya
+      lastPlatformPosition = Math.max(
+        lastPlatformPosition,
+        left + width
+      );
+    }
+
+    // Membuat musuh yang berdiri di atas platform tertentu
+    function createEnemyOnPlatform(platformLeft, platformBottom, platformWidth) {
+
+      // Membuat elemen musuh
+      const enemy = document.createElement('div');
+
+      // Menambahkan class CSS enemy
+      enemy.classList.add('enemy');
+
+      // Posisi acak di atas platform
+      const enemyLeft = platformLeft + Math.random() * (platformWidth - 35);
+      // Menempatkan musuh tepat di atas platform
+      const enemyBottom = platformBottom + 40;
+
+      enemy.style.left = enemyLeft + 'px';
+      enemy.style.bottom = enemyBottom + 'px';
+      // Menambahkan musuh ke game
+      gameWorld.appendChild(enemy);
+
+      enemies.push({
+        left: enemyLeft,
+        bottom: enemyBottom,
+        element: enemy,
+        direction: Math.random() > 0.5 ? 1 : -1, // Random initial direction
+        speed: 1 + Math.random(),
+        width: 35, // ukuran musuh
+        height: 35,
+        squashed: false, //apakah suda di injak (masih idup)
+        squashTime: 0, // menyimpan waktu saat musuh di injak
+        platformLeft: platformLeft,    // batas
+        platformRight: platformLeft + platformWidth,
+        platformBottom: platformBottom
+      });
+    }
+
+    // Fungsi untuk membuat item Pembinaan Diri
+    function createPembinaanDiri(left, bottom, type, imageUrl) {
+
+      // Membuat elemen HTML <div> baru
+      const item = document.createElement('div');
+
+      // Menambahkan class CSS "pembinaanDiri"
+      item.classList.add('pembinaanDiri');
+
+      // Mengatur posisi horizontal (sumbu X)
+      item.style.left = left + 'px';
+
+      // Mengatur posisi vertikal dari bawah (sumbu Y)
+      item.style.bottom = bottom + 'px';
+
+      // Mengatur gambar latar belakang item
+      item.style.backgroundImage = `url('${imageUrl}')`;
+
+      // Menambahkan item ke dalam area permainan (gameWorld)
+      gameWorld.appendChild(item);
+
+      // Menyimpan data item ke dalam array pembinaanDiriItems
+      pembinaanDiriItems.push({
+        left,             // posisi X
+        bottom,           // posisi Y
+        element: item,    // referensi elemen HTML
+        collected: false, // status apakah sudah diambil pemain
+        type: type        // jenis item
+      });
+    }
+
+
+    // Fungsi untuk membuat pipa/rintangan
+    function createPipe(left, bottom) {
+
+      // Membuat elemen <div> baru
+      const pipe = document.createElement('div');
+
+      // Menambahkan class CSS "pipe"
+      pipe.classList.add('pipe');
+
+      // Mengatur posisi horizontal pipa
+      pipe.style.left = left + 'px';
+
+      // Mengatur posisi vertikal pipa
+      pipe.style.bottom = bottom + 'px';
+
+      // Menambahkan pipa ke area permainan
+      gameWorld.appendChild(pipe);
+
+      // Menyimpan data pipa ke array pipes
+      pipes.push({
+        left,             // posisi X
+        bottom,           // posisi Y
+        element: pipe,    // elemen HTML pipa
+        width: 50,        // lebar pipa
+        height: 80        // tinggi pipa
+      });
+    }
+
+
+    // Fungsi untuk membuat garis finish
+    function createFinishLine(left) {
+
+      // Membuat elemen <div> baru
+      const finish = document.createElement('div');
+
+      // Menambahkan class CSS "finish"
+      finish.classList.add('finish');
+
+      // Menentukan posisi horizontal finish
+      finish.style.left = left + 'px';
+
+      // Posisi vertikal tetap 28px dari bawah
+      finish.style.bottom = '28px';
+
+      // Menambahkan finish line ke game world
+      gameWorld.appendChild(finish);
+
+      // Menyimpan data finish line ke variabel finishLine
+      finishLine = {
+        left,              // posisi X
+        bottom: 50,        // posisi Y
+        element: finish,   // elemen HTML
+        width: 80,         // lebar finish
+        height: 300        // tinggi finish
+      };
+    }
+
+
+    // Fungsi untuk membuat awan di latar belakang
+    function createCloud(left, top) {
+
+      // Membuat elemen <div> baru
+      const cloud = document.createElement('div');
+
+      // Menambahkan class CSS "cloud"
+      cloud.classList.add('cloud');
+
+      // Mengatur posisi horizontal awan
+      cloud.style.left = left + 'px';
+
+      // Mengatur posisi vertikal dari atas
+      cloud.style.top = top + 'px';
+
+      // Membuat ukuran awan secara acak antara 60px - 100px
+      const size = 60 + Math.random() * 40;
+
+      // Mengatur lebar awan
+      cloud.style.width = size + 'px';
+
+      // Mengatur tinggi awan (2/3 dari lebarnya)
+      cloud.style.height = size / 1.5 + 'px';
+
+      // Menambahkan awan ke game world
+      gameWorld.appendChild(cloud);
+
+      // Menyimpan data awan ke array clouds
+      clouds.push({
+        left,                 // posisi X
+        top,                  // posisi Y
+        element: cloud,       // elemen HTML awan
+        speed: 0.3 + Math.random() * 0.3 // kecepatan gerak acak (0.3 - 0.6)
+      });
+    }
+
+    // Mengecek apakah karakter sedang berdiri di atas platform
+    function checkPlatformCollisions() {
+
+      // Penanda apakah karakter sedang berada di platform
+      let onPlatform = false;
+
+      // Memeriksa setiap platform yang ada
+      platforms.forEach(platform => {
+
+        // Menghitung sisi kanan karakter
+        const characterRight = characterLeft + characterWidth;
+
+        // Menghitung sisi atas karakter
+        const characterTop = characterBottom + characterHeight;
+
+        // Menghitung sisi kanan platform
+        const platformRight = platform.left + platform.width;
+
+        // Menghitung sisi atas platform
+        const platformTop = platform.bottom + platform.height;
+
+        // Cek apakah karakter berada tepat di atas platform
+        if (
+          characterRight > platform.left &&      // karakter melewati sisi kiri platform
+          characterLeft < platformRight &&       // karakter belum melewati sisi kanan platform
+          Math.abs(characterBottom - platformTop) < 15 && // jarak karakter ke atas platform sangat dekat
+          velocityY <= 0                         // karakter sedang turun atau diam
+        ) {
+
+          // Tempatkan karakter tepat di atas platform
+          characterBottom = platformTop;
+
+          // Hentikan gerakan jatuh
+          velocityY = 0;
+
+          // Karakter tidak sedang melompat
+          isJumping = false;
+
+          // Reset jumlah lompatan (double jump)
+          jumpCount = 0;
+
+          // Tandai bahwa karakter berada di platform
+          onPlatform = true;
+        }
+      });
+
+      // Mengembalikan status apakah karakter sedang di platform
+      return onPlatform;
+    }
+
+    // Mengecek tabrakan karakter dengan item pembinaan diri
+    function checkPembinaanDiriCollisions() {
+
+      // Memeriksa seluruh item pembinaan diri
+      pembinaanDiriItems.forEach(pembinaanDiri => {
+
+        // Hanya cek item yang belum diambil
+        if (!pembinaanDiri.collected) {
+
+          // Hitung batas karakter
+          const characterRight = characterLeft + characterWidth;
+          const characterTop = characterBottom + characterHeight;
+
+          // Hitung batas item
+          const pembinaanDiriRight = pembinaanDiri.left + 45;
+          const pembinaanDiriTop = pembinaanDiri.bottom + 45;
+
+          // Deteksi tabrakan (collision box)
+          if (
+            characterRight > pembinaanDiri.left &&
+            characterLeft < pembinaanDiriRight &&
+            characterTop > pembinaanDiri.bottom &&
+            characterBottom < pembinaanDiriTop
+          ) {
+
+            // Tandai item sudah diambil
+            pembinaanDiri.collected = true;
+
+            // Sembunyikan item dari layar
+            pembinaanDiri.element.style.display = 'none';
+
+            // Putar suara sesuai jenis item
+            if (pembinaanDiriSounds[pembinaanDiri.type]) {
+              pembinaanDiriSounds[pembinaanDiri.type].play();
+            }
+
+            // Simpan jenis item yang berhasil dikumpulkan
+            if (!collectedPembinaanDiri.includes(pembinaanDiri.type)) {
+
+              collectedPembinaanDiri.push(
+                pembinaanDiri.type
+              );
+
+              // Menampilkan jumlah item yang berhasil dikumpulkan
+              console.log(
+                'Total gambar didapat:',
+                collectedPembinaanDiri.length
+              );
+            }
+          }
+        }
+      });
+    }
+
+    // Mengecek tabrakan karakter dengan musuh
+    function checkEnemyCollisions() {
+
+      // Memeriksa semua musuh
+      enemies.forEach(enemy => {
+
+        // Jika musuh sudah diinjak, lewati
+        if (enemy.squashed) return;
+
+        // Hitung batas karakter
+        const characterRight = characterLeft + characterWidth;
+        const characterTop = characterBottom + characterHeight;
+
+        // Hitung batas musuh
+        const enemyRight = enemy.left + enemy.width;
+        const enemyTop = enemy.bottom + enemy.height;
+
+        // Cek tabrakan karakter dan musuh
+        if (
+          characterRight > enemy.left &&
+          characterLeft < enemyRight &&
+          characterTop > enemy.bottom &&
+          characterBottom < enemyTop
+        ) {
+
+          // Jika karakter jatuh dari atas musuh
+          if (
+            velocityY < 0 &&
+            characterBottom > enemyTop - 20
+          ) {
+
+            // Tandai musuh telah diinjak
+            enemy.squashed = true;
+
+            // Simpan waktu musuh diinjak
+            enemy.squashTime = Date.now();
+
+            // Tambahkan efek visual musuh gepeng
+            enemy.element.classList.add('squashed');
+
+            // Karakter memantul ke atas
+            velocityY = jumpHeight / 1.5;
+
+          } else {
+
+            // Jika menabrak dari samping/bawah maka kalah
+            playerFailedScreen();
+          }
+        }
+      });
+    }
+
+    //Menampilkan halaman petunjuk permainan.
+    function openGuide() {
+      // Menampilkan kartu petunjuk
+      document.getElementById("guideCard")
+        .classList.remove("hidden");
+
+      // Menyembunyikan area permainan
+      document.getElementById("game-container")
+        .style.display = "none";
+
+      // Menyembunyikan tombol kontrol
+      document.getElementById("controls")
+        .style.display = "none";
+    }
+
+    //Menutup halaman petunjuk dan kembali ke game.
+    function closeGuide() {
+      // Menyembunyikan kartu petunjuk
+      document.getElementById("guideCard")
+        .classList.add("hidden");
+
+      // Menampilkan kembali area permainan
+      document.getElementById("game-container")
+        .style.display = "block";
+
+      // Menampilkan kembali tombol kontrol
+      document.getElementById("controls")
+        .style.display = "flex";
+    }
+
+    // Fungsi untuk mengecek apakah karakter sudah menyentuh garis finish
+    function checkFinishCollision() {
+      // Jika objek finishLine belum ada, hentikan fungsi
+      if (!finishLine) return;
+
+      // Menghitung posisi sisi kanan karakter
+      const characterRight = characterLeft + characterWidth;
+
+      // Menghitung posisi sisi atas karakter
+      const characterTop = characterBottom + characterHeight;
+
+      // Menghitung posisi sisi kanan finish line
+      const finishRight = finishLine.left + finishLine.width;
+
+      // Menghitung posisi sisi atas finish line
+      const finishTop = finishLine.bottom + finishLine.height;
+
+      // Deteksi tabrakan menggunakan metode AABB (Axis-Aligned Bounding Box)
+      // Mengecek apakah area karakter bertumpang tindih dengan area finish line
+      if (
+        characterRight > finishLine.left &&      // Sisi kanan karakter melewati sisi kiri finish
+        characterLeft < finishRight &&           // Sisi kiri karakter masih sebelum sisi kanan finish
+        characterTop > finishLine.bottom &&      // Sisi atas karakter melewati sisi bawah finish
+        characterBottom < finishTop              // Sisi bawah karakter masih di bawah sisi atas finish
+      ) {
+
+        // Memainkan suara kemenangan saat menyentuh finish
+        winSound.play();
+
+        // Mengecek apakah semua item Pembinaan Diri sudah terkumpul
+        // Minimal harus ada 5 item yang telah dikumpulkan
+        if (collectedPembinaanDiri.length >= 5) {
+
+          // Menjalankan fungsi kemenangan game
+          gameWin();
+        }
+      }
+    }
+
+    // Fungsi untuk menggerakkan semua musuh
+    function moveEnemies() {
+      // Mengambil waktu saat ini untuk menghitung durasi musuh yang sudah diinjak
+      const currentTime = Date.now();
+
+      // Melakukan perulangan untuk setiap musuh
+      enemies.forEach(enemy => {
+
+        // Jika musuh sudah diinjak (squashed)
+        if (enemy.squashed) {
+
+          // Setelah 2 detik, sembunyikan musuh
+          if (currentTime - enemy.squashTime > 2000) {
+            enemy.element.style.display = 'none';
+          }
+
+          // Lewati proses pergerakan musuh ini
+          return;
+        }
+
+        // Menggerakkan musuh sesuai arah dan kecepatannya
+        enemy.left += enemy.direction * enemy.speed;
+
+        // Jika musuh memiliki batas platform patroli
+        if (
+          enemy.platformLeft !== undefined &&
+          enemy.platformRight !== undefined
+        ) {
+
+          // Jika mencapai ujung kiri atau kanan platform
+          if (
+            enemy.left <= enemy.platformLeft ||
+            enemy.left >= enemy.platformRight - enemy.width
+          ) {
+
+            // Balik arah gerakan
+            enemy.direction *= -1;
+
+            // Membalik tampilan sprite sesuai arah gerakan
+            enemy.element.style.transform =
+              enemy.direction > 0 ? 'scaleX(1)' : 'scaleX(-1)';
+          }
+
+        } else {
+
+          // Jika tidak memiliki batas platform,
+          // gunakan batas map sebagai area patroli
+
+          if (
+            enemy.left < 0 ||
+            enemy.left > mapLength - enemy.width
+          ) {
+
+            // Balik arah gerakan
+            enemy.direction *= -1;
+
+            // Membalik sprite
+            enemy.element.style.transform =
+              enemy.direction > 0 ? 'scaleX(1)' : 'scaleX(-1)';
+          }
+        }
+
+        // Mengupdate posisi musuh pada layar
+        enemy.element.style.left = enemy.left + 'px';
+      });
+    }
+
+    // Fungsi untuk menggerakkan awan di background
+    function moveClouds() {
+      // Perulangan untuk semua awan
+      clouds.forEach(cloud => {
+
+        // Menggeser awan ke kiri sesuai kecepatannya
+        cloud.left -= cloud.speed;
+
+        // Jika awan keluar dari layar sebelah kiri
+        if (cloud.left < -80) {
+
+          // Pindahkan kembali ke ujung kanan map
+          cloud.left = mapLength;
+
+          // Berikan posisi tinggi baru secara acak
+          cloud.top = Math.random() * (gameHeight / 3);
+        }
+
+        // Mengupdate posisi awan di layar
+        cloud.element.style.left = cloud.left + 'px';
+      });
+    }
+
+    // Fungsi untuk mengatur kamera agar mengikuti karakter
+    function updateCamera() {
+      // Mengambil lebar area permainan yang terlihat oleh pemain
+      viewWidth = gameContainer.offsetWidth;
+
+      // Menghitung posisi ideal kamera
+      // Tujuannya agar karakter berada di tengah layar
+      const idealOffset =
+        characterLeft -
+        (viewWidth / 2) +
+        (characterWidth / 2);
+
+      // Membatasi kamera agar tidak keluar dari batas map
+      let newOffset = Math.max(
+        0,
+        Math.min(idealOffset, mapLength - viewWidth)
+      );
+
+      // Efek smoothing/easing
+      // Kamera bergerak lebih halus dan tidak langsung lompat
+      worldOffset =
+        worldOffset * 0.8 +
+        newOffset * 0.2;
+
+      // Menggeser seluruh dunia permainan ke kiri
+      // sehingga karakter terlihat tetap berada di tengah layar
+      gameWorld.style.transform =
+        `translateX(-${worldOffset}px)`;
+    }
+
+    // Mengecek apakah karakter jatuh ke jurang (fall death)
+    function checkFallingDeath() {
+      // Mengecek apakah karakter sedang berada di atas platform
+      const onPlatform = checkPlatformCollisions();
+      // Jika karakter berada di platform
+      if (onPlatform) {
+        // Reset penghitung waktu sejak meninggalkan platform
+        timeSinceOffPlatform = 0;
+        // Tandai bahwa sebelumnya karakter berada di platform
+        lastOnPlatform = true;
+        // Tidak mati
+        return false;
+      }
+
+      // Jika sebelumnya berada di platform tetapi sekarang tidak
+      if (lastOnPlatform && !onPlatform) {
+        // Update status bahwa karakter sudah tidak di platform
+        lastOnPlatform = false;
+        // Mulai hitung waktu jatuh
+        timeSinceOffPlatform = 0;
+      }
+
+      // Jika karakter sedang jatuh
+      // velocityY negatif berarti arah gerak ke bawah
+      if (!onPlatform && velocityY < 0) {
+
+        // Tambahkan waktu jatuh
+        timeSinceOffPlatform++;
+        // Jika posisi karakter sudah melewati batas kematian
+        if (characterBottom < -FALL_DEATH_THRESHOLD) {
+          // Putar suara jatuh
+          fallSound.play();
+          // Karakter mati
+          return true;
+        }
+      }
+      // Karakter belum mati
+      return false;
+    }
+
+    // Menampilkan layar gagal/kalah
+    function playerFailedScreen() {
+      // Mengubah status permainan menjadi gagal
+      playerFailed = true;
+      // Menampilkan elemen layar gagal
+      playerFailedElement.style.display = 'flex';
+      // Memainkan suara salah/gagal
+      wrongSound.play();
+      // Menghentikan game loop
+      cancelAnimationFrame(gameAnimationId);
+    }
+
+
+    // Menampilkan kondisi menang
+    function gameWin() {
+      // Menghentikan permainan
+      playerFailed = true;
+      // Memastikan semua item Pembinaan Diri sudah terkumpul
+      if (collectedPembinaanDiri.length >= 5) {
+
+        // Menambahkan 200 poin
+        point += 200;
+        // Menyimpan poin ke session browser
+        sessionStorage.setItem("point_diri", point);
+        // Mengirim skor ke backend menggunakan Fetch API
+        fetch('/save-score/diri', {
+          // Menggunakan metode POST
+          method: 'POST',
+          // Header JSON
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          // Data yang dikirim ke server
+          body: JSON.stringify({
+            score: point,
+            level: 2
+          })
+        });
+
+        // Menandai bahwa level 2 telah selesai
+        sessionStorage.setItem("level2_diri", "true");
+        // Mengupdate tampilan poin pada UI
+        document.getElementById("point").innerText = point;
+        // Membuat isi popup kemenangan
+        gameWinElement.innerHTML = `
+      <div>SELAMAT! 🎉</div>
+      <div style="margin-top:10px; font-size:28px;">
+        POINT: 200
+      </div>
+      <a href="/bermain/diri/3" class="next-btn">
+        Next
+      </a>
+    `;
+      }
+
+      // Menampilkan popup kemenangan
+      gameWinElement.style.display = 'flex';
+      // Menghentikan game loop
+      cancelAnimationFrame(gameAnimationId);
+    }
+
+    // Mengambil poin dari sessionStorage
+    // Jika belum ada, nilai awal = 0
+    let point =
+      parseInt(sessionStorage.getItem("point_diri")) || 0;
+    // Menampilkan poin awal pada UI
+    document.getElementById("point").innerText = point;
+
+
+    // Fungsi utama game loop (dijalankan terus menerus setiap frame)
+    function gameLoop() {
+      // Jika pemain gagal/kalah, hentikan game loop
+      if (playerFailed) return;
+
+      // ==========================
+      // SISTEM GRAVITASI & LOMPATAN
+      // ==========================
+      // Mengurangi kecepatan vertikal karena pengaruh gravitasi
+      velocityY -= gravity;
+      // Memindahkan posisi karakter secara vertikal
+      characterBottom += velocityY;
+
+      // Mengecek apakah karakter sedang berada di atas platform
+      const onPlatform = checkPlatformCollisions();
+
+      // Jika karakter menyentuh tanah dan tidak berada di platform
+      if (characterBottom <= 0 && !onPlatform) {
+        // Tetapkan posisi karakter tepat di tanah
+        characterBottom = 0;
+        // Hentikan gerakan vertikal
+        velocityY = 0;
+        // Status karakter tidak sedang melompat
+        isJumping = false;
+        // Reset jumlah lompatan (misalnya untuk double jump)
+        jumpCount = 0;
+      }
+
+      // ==========================
+      // ANIMASI KARAKTER
+      // ==========================
+      // Saat bergerak ke atas (melompat)
+      if (velocityY > 0) {
+        characterSprite.style.backgroundImage =
+          "url('/Bermain/diri/dua/Karakter_tdkkaki.png')";
+      }
+      // Saat jatuh atau berdiri
+      else {
+        characterSprite.style.backgroundImage =
+          "url('/Bermain/diri/dua/Karakter_kaki.png')";
+      }
+
+      // ==========================
+      // GERAK HORIZONTAL KARAKTER
+      // ==========================
+      // Jika tombol kiri ditekan
+      if (isMovingLeft) {
+        // Geser karakter ke kiri
+        characterLeft -= 5;
+        // Simpan arah karakter
+        characterDirection = -1;
+        // Balik sprite menghadap kiri
+        character.style.transform = 'scaleX(-1)';
+      }
+
+      // Jika tombol kanan ditekan
+      if (isMovingRight) {
+        // Geser karakter ke kanan
+        characterLeft += 5;
+        // Simpan arah karakter
+        characterDirection = 1;
+        // Sprite menghadap kanan
+        character.style.transform = 'scaleX(1)';
+      }
+
+      // ==========================
+      // BATAS MAP
+      // ==========================
+      // Mencegah karakter keluar dari sisi kiri map
+      if (characterLeft < 0) {
+        characterLeft = 0;
+      }
+      // Mencegah karakter keluar dari sisi kanan map
+      if (characterLeft > mapLength - characterWidth) {
+        characterLeft = mapLength - characterWidth;
+      }
+      // ==========================
+      // SISTEM KAMERA
+      // ==========================
+      // Kamera mengikuti posisi karakter
+      updateCamera();
+      // ==========================
+      // UPDATE OBJEK GAME
+      // ==========================
+      // Menggerakkan semua musuh
+      moveEnemies();
+      // Menggerakkan awan/latar belakang
+      moveClouds();
+
+      // ==========================
+      // CEK TABRAKAN (COLLISION)
+      // ==========================
+      // Cek tabrakan dengan item pembinaan diri
+      checkPembinaanDiriCollisions();
+      // Cek tabrakan dengan musuh
+      checkEnemyCollisions();
+      // Cek apakah karakter mencapai garis finish
+      checkFinishCollision();
+      // ==========================
+      // CEK KARAKTER JATUH
+      // ==========================
+      // Jika karakter jatuh ke area kematian
+      if (checkFallingDeath()) {
+        // Tampilkan layar gagal
+        playerFailedScreen();
+      }
+
+      // ==========================
+      // UPDATE POSISI KARAKTER
+      // ==========================
+      // Mengubah posisi dunia menjadi posisi yang terlihat di layar
+      const characterVisiblePosition =
+        characterLeft - worldOffset;
+      // Perbarui posisi horizontal karakter
+      character.style.left =
+        characterVisiblePosition + 'px';
+      // Perbarui posisi vertikal karakter
+      character.style.bottom =
+        characterBottom + 'px';
+
+      // ==========================
+      // ULANGI GAME LOOP
+      // ==========================
+      // Meminta browser menjalankan gameLoop lagi pada frame berikutnya
+      gameAnimationId =
+        requestAnimationFrame(gameLoop);
+    }
+
+    // ======================================
+    // KONTROL KEYBOARD
+    // ======================================
+
+    // Saat tombol keyboard ditekan
+    document.addEventListener('keydown', (e) => {
+
+      // Jika pemain gagal/kalah, abaikan input
+      if (playerFailed) return;
+
+      // Tombol panah kiri ditekan
+      if (e.key === 'ArrowLeft') {
+        isMovingLeft = true;
+      }
+
+      // Tombol panah kanan ditekan
+      if (e.key === 'ArrowRight') {
+        isMovingRight = true;
+      }
+
+      // Tombol panah atas untuk melompat
+      if (e.key === 'ArrowUp' && jumpCount < 2) {
+
+        // Karakter sedang melompat
+        isJumping = true;
+
+        // Tambah jumlah lompatan
+        jumpCount++;
+
+        // Berikan kecepatan ke atas
+        velocityY = jumpHeight;
+      }
+    });
+
+    // Saat tombol keyboard dilepas
+    document.addEventListener('keyup', (e) => {
+
+      // Hentikan gerakan ke kiri
+      if (e.key === 'ArrowLeft') {
+        isMovingLeft = false;
+      }
+
+      // Hentikan gerakan ke kanan
+      if (e.key === 'ArrowRight') {
+        isMovingRight = false;
+      }
+    });
+
+
+    // ======================================
+    // KONTROL TOUCHSCREEN (HP/TABLET)
+    // ======================================
+
+    // Tombol kiri disentuh
+    leftBtn.addEventListener('touchstart', () => {
+
+      if (playerFailed) return;
+
+      isMovingLeft = true;
+    });
+
+    // Sentuhan dilepas
+    leftBtn.addEventListener('touchend', () => {
+
+      isMovingLeft = false;
+    });
+
+    // Tombol kanan disentuh
+    rightBtn.addEventListener('touchstart', () => {
+
+      if (playerFailed) return;
+
+      isMovingRight = true;
+    });
+
+    // Sentuhan kanan dilepas
+    rightBtn.addEventListener('touchend', () => {
+
+      isMovingRight = false;
+    });
+
+    // Tombol lompat disentuh
+    jumpBtn.addEventListener('touchstart', () => {
+
+      if (playerFailed) return;
+
+      // Double jump maksimal 2 kali
+      if (jumpCount < 2) {
+
+        isJumping = true;
+
+        jumpCount++;
+
+        velocityY = jumpHeight;
+      }
+    });
+
+
+    // ======================================
+    // KONTROL MOUSE (PC)
+    // ======================================
+
+    // Tombol kiri ditekan mouse
+    leftBtn.addEventListener('mousedown', () => {
+
+      if (playerFailed) return;
+
+      isMovingLeft = true;
+    });
+
+    // Tombol kiri dilepas
+    leftBtn.addEventListener('mouseup', () => {
+
+      isMovingLeft = false;
+    });
+
+    // Mouse keluar dari area tombol kiri
+    leftBtn.addEventListener('mouseleave', () => {
+
+      isMovingLeft = false;
+    });
+
+    // Tombol kanan ditekan mouse
+    rightBtn.addEventListener('mousedown', () => {
+
+      if (playerFailed) return;
+
+      isMovingRight = true;
+    });
+
+    // Tombol kanan dilepas
+    rightBtn.addEventListener('mouseup', () => {
+
+      isMovingRight = false;
+    });
+
+    // Mouse keluar dari area tombol kanan
+    rightBtn.addEventListener('mouseleave', () => {
+
+      isMovingRight = false;
+    });
+
+    // Tombol lompat ditekan mouse
+    jumpBtn.addEventListener('mousedown', () => {
+
+      if (playerFailed) return;
+
+      // Maksimal double jump
+      if (jumpCount < 2) {
+
+        isJumping = true;
+
+        jumpCount++;
+
+        velocityY = jumpHeight;
+      }
+    });
+
+
+    // ======================================
+    // TOMBOL RESTART GAME
+    // ======================================
+
+    // Untuk setiap tombol restart
+    restartBtns.forEach(btn => {
+
+      // Saat tombol diklik
+      btn.addEventListener('click', init);
+
+      // Menjalankan fungsi init()
+      // untuk mengulang game dari awal
+    });
+
+
+    // ======================================
+    // RESPONSIVE GAME (RESIZE WINDOW)
+    // ======================================
+
+    // Saat ukuran browser berubah
+    window.addEventListener('resize', function () {
+
+      // Lebar maksimal game 1000px
+      const containerWidth =
+        Math.min(window.innerWidth - 20, 1000);
+
+      // Terapkan ukuran baru
+      gameContainer.style.width =
+        containerWidth + 'px';
+
+      // Update lebar area pandang game
+      viewWidth = containerWidth;
+    });
+
+    // Jalankan resize sekali saat awal halaman dibuka
+    window.dispatchEvent(new Event('resize'));
+
+
+    // ======================================
+    // PRELOAD AUDIO
+    // ======================================
+
+    // Memuat semua file suara sebelum game dimainkan
+    function preloadSounds() {
+
+      // Memuat suara item pembinaan diri
+      for (const type in pembinaanDiriSounds) {
+        pembinaanDiriSounds[type].load();
+      }
+
+      // Memuat suara salah
+      wrongSound.load();
+
+      // Memuat suara jatuh
+      fallSound.load();
+    }
+
+    // Jalankan preload
+    preloadSounds();
+
+
+    // ======================================
+    // CEK STATUS LEVEL 2
+    // ======================================
+
+    // Ambil status penyelesaian level dari sessionStorage
+    const level2Selesai =
+      sessionStorage.getItem("level2_diri");
+
+
+    // ======================================
+    // JIKA LEVEL SUDAH SELESAI
+    // ======================================
+
+    if (level2Selesai === "true") {
+
+      // Ambil point terakhir pemain
+      const finalPoint =
+        parseInt(sessionStorage.getItem("point_diri")) || 0;
+
+      // Hentikan permainan
+      playerFailed = true;
+
+      // Sembunyikan pesan gagal
+      playerFailedElement.style.display = 'none';
+
+      // Tampilkan layar kemenangan
+      gameWinElement.innerHTML = `
+    <div>LEVEL 2 SUDAH SELESAI ✅</div>
+
+    <a href="/bermain/diri/3" class="next-btn">
+      Next
+    </a>
+
+    <a href="/" class="next-btn" style="margin-top:10px;">
+      Home
+    </a>
+  `;
+
+      // Tampilkan panel kemenangan
+      gameWinElement.style.display = 'flex';
+
+    }
+
+
+    // ======================================
+    // JIKA LEVEL BELUM SELESAI
+    // ======================================
+
+    else {
+
+      // Mulai game dari awal
+      init();
+    }
+
+  </script>
+</body>
+
+</html>

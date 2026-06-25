@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Home</title>
+
+    <!-- WAJIB biar ga kecil di HP, responsive -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="/index.css">
+
+</head>
+
+<body>
+    <!--sifat div Block Element-->
+    <!-- USER -->
+    <div class="user-info">
+        👤 <%= user.username %>
+    </div>
+
+    <!-- LOGOUT -->
+    <a href="#" onclick="logout()" class="logout-icon">
+        <img src="/logout.png" alt="Logout">
+    </a>
+
+    <!-- BACKGROUND -->
+    <div class="background"></div>
+
+    <audio id="bgm" autoplay loop>
+        <source src="/audio/backsound.mp3" type="audio/mpeg">
+    </audio>
+
+    <script src="/js/audioManager.js"></script>
+
+    <!-- KARAKTER -->
+    <div class="character">
+        <img src="/motion.gif" alt="Character">
+    </div>
+
+    <!-- CONTENT -->
+    <main class="container"> <!--main, Menandai konten utama halaman-->
+        <div class="content"> <!--div, Wadah umum tidak punya arti khusus-->
+
+            <h3 class="menu-title">
+                <span class="title-top">Game Pembinaan Remaja</span> <!--span untuk membungkus teks atau bagian kecil di
+                dalam elemen lain.-->
+                <span class="subtitle">(Al-Mumtaza)</span>
+            </h3>
+
+            <div class="menu">
+                <a href="/materi"><button>Materi</button></a>
+                <a href="/bermain"><button>Bermain</button></a>
+                <a href="/petunjuk"><button>Petunjuk</button></a>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        function logout() {
+
+            sessionStorage.clear();
+
+            window.location.href = "/logout";
+        }
+    </script>
+
+</body>
+
+</html>

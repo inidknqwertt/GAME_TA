@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petunjuk Game</title>
+
+    <link rel="stylesheet" href="/petunjuk.css"> <!--menghubungkan file CSS ke halaman HTML -->
+</head>
+
+<body>
+
+    <!-- BACKGROUND -->
+    <div class="background"></div>
+
+    <!-- USER INFO -->
+    <div class="user-info">
+        👤 <%= user.username %>
+    </div>
+
+    <audio id="bgm" autoplay loop>
+        <source src="/audio/backsound.mp3" type="audio/mpeg">
+    </audio>
+
+    <script src="/js/audioManager.js"></script>
+
+    <!-- MAIN -->
+    <main class="container">
+        <div class="content">
+
+            <!-- NAV -->
+            <button class="nav prev" onclick="prevSlide()">
+                <img src="/prevv.png" alt="Previous">
+            </button>
+
+            <button class="nav next" onclick="nextSlide()">
+                <img src="/nextt.png" alt="Next">
+            </button>
+
+            <!-- SLIDE 1 -->
+            <section class="slide active">
+                <div class="slide-header">
+                    <h2>Petunjuk Permainan</h2>
+
+                    <div class="header-image">
+                        <img src="/motion.gif" alt="Petunjuk">
+                    </div>
+                </div>
+
+                <div class="text-card">
+                    <p>Selamat datang di permainan <b>Misi Surga!</b></p>
+                    <p>
+                        Tujuan utama permainan ini adalah mengumpulkan sebanyak mungkin
+                        <b>“amal”</b> dalam bentuk poin.
+                    </p>
+                </div>
+            </section>
+
+            <!-- SLIDE 2 -->
+            <section class="slide">
+                <div class="slide-header">
+                    <h2>Cara Bermain</h2>
+                </div>
+
+                <div class="text-card">
+                    <p>Pemain memulai dari Menu Utama, pilih Bermain, lalu memilih kategori yang diinginkan.</p>
+                    <p>Setiap kategori memiliki 3 tingkat yaitu</p>
+                    <ul>
+                        <li>1</li>
+                        <li>2</li>
+                        <li>3</li>
+                    </ul>
+                    <p>sebaiknya pilih/memulai dari angka 1. Sekali klik Jawaban → status tersimpan</p>
+                </div>
+            </section>
+
+            <!-- SLIDE 3 -->
+            <section class="slide">
+                <div class="slide-header">
+                    <h2>Sistem Poin (Amal) dan Level</h2>
+                </div>
+
+                <div class="text-card">
+                    <p>
+                        Setiap jawaban atau aksi yang benar akan menambah poin (amal) sebagai bentuk pencapaian pemain.
+                    </p>
+
+                    <p>
+                        Namun jika terjadi kesalahan, poin akan berkurang sebagai bentuk konsekuensi dari setiap
+                        pilihan.
+                    </p>
+
+                    <p>
+                        Dalam beberapa kondisi tertentu (tantangan), jika pemain mengalami kesalahan, maka
+                        permainan tidak akan langsung berlanjut ke tahap berikutnya.
+                        Pemain harus menyelesaikan kembali tantangan tersebut sampai berhasil dengan benar.
+                    </p>
+
+                    <p>
+                        Setelah berhasil, pemain baru dapat melanjutkan ke level berikutnya sekaligus memperoleh
+                        tambahan poin (amal).
+                    </p>
+
+                    <p>
+                        Sistem ini dibuat agar setiap tantangan benar-benar diselesaikan dengan usaha terbaik sebelum
+                        melangkah lebih jauh.
+                    </p>
+                </div>
+            </section>
+
+            <!-- SLIDE 4 -->
+            <section class="slide">
+                <div class="slide-header">
+                    <h2>Tujuan Akhir</h2>
+                </div>
+
+                <div class="text-card">
+                    <p>
+                        Kumpulkan poin (amal) sebanyak mungkin sesuai dengan pilihan dan keputusan masing-masing pemain
+                        dalam perjalanan Misi Surga.
+                        Setiap langkah dalam permainan ini dirancang sebagai sarana pembinaan remaja untuk melatih
+                        kemampuan berpikir dengan matang sebelum bertindak, sehingga dapat terbiasa mengambil keputusan
+                        yang lebih bijak, bertanggung jawab, dan memahami konsekuensi dari setiap pilihan yang dibuat.
+                    </p>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- BACK BUTTON -->
+    <div class="back-icon">
+        <a href="/">
+            <img src="/back.png" alt="Kembali">
+        </a>
+    </div>
+
+    <!-- SCRIPT -->
+    <script>
+        // let & const adalah cara membuat variabel (tempat menyimpan data)
+
+        // currentSlide menyimpan posisi slide yang sedang aktif = variabel yng bisa berubah
+        // dimulai dari 0 (slide pertama)
+        // 4 slide (index 0-3)
+        let currentSlide = 0;
+
+        // mengambil semua elemen HTML yang memiliki class "slide"
+        // Disimpan dalam variabel slides
+        const slides = document.querySelectorAll('.slide');
+
+        // fungsi untuk menampilkan slide tertentu berdasarkan index
+        function showSlide(index) {
+
+            // menghapus class "active" dari semua slide
+            // slide tidak aktif, slide tidak terlihat
+            slides.forEach(slide => slide.classList.remove('active'));
+
+            // menambahkan class "active" pada slide yang dipilih
+            // sehingga slide tersebut tampil di layar
+            slides[index].classList.add('active');
+        }
+
+        // fungsi untuk pindah ke slide berikutnya (NEXT)
+        function nextSlide() {
+
+            // cek apakah masih ada slide berikutnya 
+            // (tidak boleh lebih dari jumlah slide)/tidak bisa lanjut
+            // slides.length Ini jumlah semua slide.
+            if (currentSlide < slides.length - 1) {
+
+                // menambah nilai currentSlide (maju 1 langkah)
+                currentSlide++;
+
+                // menampilkan slide yang baru
+                showSlide(currentSlide);
+            }
+        }
+
+        // fungsi untuk kembali ke slide sebelumnya (PREV)
+        function prevSlide() {
+
+            // jika cek apakah masih bukan slide pertama
+            // slide lebih besar dari 0
+            // (tidak boleh kurang dari 0)
+            if (currentSlide > 0) {
+
+                // mengurangi nilai currentSlide (mundur 1 langkah)
+                currentSlide--;
+
+                // menampilkan slide yang baru
+                showSlide(currentSlide);
+            }
+        }
+
+        // saat halaman pertama dibuka
+        // langsung tampilkan slide pertama (index 0)
+        showSlide(currentSlide);
+    </script>
+
+</body>
+
+</html>

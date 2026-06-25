@@ -1,0 +1,270 @@
+/* =========================
+RESET
+========================= */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* =========================
+BODY
+========================= */
+body {
+    font-family: 'Nunito', sans-serif;
+    background: #0b1e3c;
+    color: #fff;
+    overflow-x: hidden;
+}
+
+/* =========================
+BACKGROUND
+========================= */
+.background {
+    position: fixed;
+    inset: 0;
+    background: url('/BG.png') center/cover no-repeat;
+    z-index: -1;
+}
+
+/* =========================
+USER INFO
+========================= */
+.user-info {
+    position: fixed;
+    top: 15px;
+    left: clamp(10px, 3vw, 20px);
+    background: rgba(255, 255, 255, 0.85);
+    color: #0b1e3c;
+    padding: 8px 15px;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: clamp(12px, 2.5vw, 14px);
+    z-index: 10;
+}
+
+/* =========================
+CONTAINER
+========================= */
+.container {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: clamp(15px, 3vw, 20px);
+}
+
+/* =========================
+CONTENT
+========================= */
+.content {
+    width: 100%;
+    max-width: 1100px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* =========================
+SLIDE UTAMA
+========================= */
+.slide {
+    display: none;
+    width: min(92vw, 900px);
+    max-height: 80dvh;
+
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+
+    scroll-behavior: smooth;
+    scrollbar-gutter: stable both-edges;
+
+    padding: 25px;
+    border-radius: 25px;
+
+    background: rgba(245, 240, 220, 0.9);
+    border: 3px solid #ffffff;
+
+    box-shadow:
+        0 10px 25px rgba(0, 0, 0, 0.3),
+        0 0 0 6px rgba(255, 255, 255, 0.7);
+
+    text-align: center;
+    animation: fade 0.5s ease;
+
+    /* ===== FIREFOX ===== */
+    scrollbar-width: auto;
+    scrollbar-color: #2e7d32 rgba(255, 255, 255, 0.25);
+}
+
+.slide.active {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* =========================
+HEADER IMAGE
+========================= */
+.header-image {
+    margin-top: 10px;
+    margin-bottom: 5px;
+    text-align: center;
+}
+
+.header-image img {
+    width: 150px;
+    height: auto;
+}
+
+/* =========================
+TITLE
+========================= */
+.slide h2 {
+    font-size: clamp(24px, 4vw, 30px);
+    margin-bottom: 15px;
+    color: #2e7d32;
+    /* hijau lebih kalem */
+    position: relative;
+}
+
+.slide h2::after {
+    content: "";
+    display: block;
+    width: 60px;
+    height: 4px;
+    margin: 8px auto 0;
+
+    background: linear-gradient(90deg, #66bb6a, #ff9800);
+    border-radius: 10px;
+}
+
+/* =========================
+TEXT CARD
+========================= */
+.text-card {
+    margin-top: 15px;
+    max-width: 700px;
+    width: 100%;
+    padding: 20px;
+
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    text-align: center;
+    animation: fade 0.5s ease;
+    border: 2px solid #ffb74d;
+}
+
+.text-card p {
+    font-size: clamp(17px, 3vw, 20px);
+    line-height: 1.8;
+    color: #2c3e50;
+
+    margin-bottom: 12px;
+    padding: 12px 15px;
+
+    border: 2px solid #4caf50;
+    border-radius: 10px;
+
+    background: rgba(255, 255, 255, 0.6);
+}
+
+.text-card ul {
+    margin-top: 10px;
+    padding-left: 0;
+    list-style-position: inside;
+    text-align: center;
+    color: #2c3e50;
+}
+
+.text-card li {
+    margin-bottom: 6px;
+    font-size: clamp(17px, 3vw, 20px);
+}
+
+/* =========================
+NAV
+========================= */
+.nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 3;
+    background: none;
+    border: none;
+}
+
+.nav.prev {
+    left: -12px;
+}
+
+.nav.next {
+    right: -12px;
+}
+
+.nav img {
+    width: clamp(32px, 5vw, 45px);
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.nav img:hover {
+    transform: scale(1.12);
+}
+
+.nav img:active {
+    transform: scale(0.95);
+}
+
+/* =========================
+BACK BUTTON
+========================= */
+.back-icon {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+}
+
+.back-icon img {
+    width: clamp(32px, 7vw, 42px);
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+.back-icon img:hover {
+    transform: scale(1.15);
+}
+
+.back-icon img:active {
+    transform: scale(0.9);
+}
+
+/* =========================
+ANIMATION
+========================= */
+@keyframes fade {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* =========================
+RESPONSIVE
+========================= */
+@media (max-width: 6768px) {
+    .slide {
+        width: 92vw;
+        max-height: 75dvh;
+    }
+
+    .header-image img {
+        width: 120px;
+    }
+}

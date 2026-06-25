@@ -1,0 +1,353 @@
+@import url('/diri_1.css');
+
+/* =========================
+CONTENT
+========================= */
+.content {
+    background-color: #43a047;
+
+    width: calc(100% - 20px);
+    max-width: 500px;
+
+    padding: 16px;
+
+    border-radius: 30px;
+
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+    text-align: center;
+
+    box-sizing: border-box;
+
+    margin: 10px auto;
+
+    overflow-x: hidden;
+}
+
+/* =========================
+JUDUL
+========================= */
+.judul {
+    font-size: 23px;
+    font-weight: 700;
+
+    margin-bottom: 10px;
+
+    color: white;
+}
+
+#questionImage {
+    display: block;
+
+    max-width: 200px;
+    width: 100%;
+
+    height: auto;
+
+    margin: 15px auto;
+}
+
+/* =========================
+QUESTION
+========================= */
+.question {
+    background: rgba(255, 255, 255, 0.25);
+
+    padding: 15px;
+
+    border-radius: 20px;
+
+    margin-bottom: 20px;
+
+    color: black;
+}
+
+/* =========================
+ANSWER BUTTON
+========================= */
+.answers {
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 15px;
+
+    align-items: center;
+
+    padding: 0 10px;
+
+    box-sizing: border-box;
+}
+
+.answer-btn {
+
+    width: 100%;
+    max-width: 850px;
+
+    padding: 14px 20px;
+
+    border-radius: 20px;
+
+    background: #056009;
+
+    color: white;
+
+    border: none;
+
+    font-weight: 600;
+
+    font-size: 16px;
+
+    transition: 0.2s;
+}
+
+.answer-btn:hover {
+    transform: scale(1.02);
+}
+
+.answer-btn:active,
+.answer-btn:focus,
+.answer-btn:focus-visible {
+    background-color: inherit !important;
+    outline: none;
+}
+
+/* =========================
+DRAG TITLE
+========================= */
+#dragGame h3 {
+
+    color: white;
+
+    margin-bottom: 15px;
+
+    font-size: clamp(18px, 4vw, 32px);
+
+    line-height: 1.3;
+}
+
+/* =========================
+DRAG CONTAINER
+========================= */
+.drag-container {
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 25px;
+
+    width: 100%;
+}
+
+/* =========================
+DROP BOXES
+========================= */
+.drop-boxes.horizontal {
+
+    display: flex;
+    flex-wrap: wrap;
+
+    justify-content: center;
+
+    gap: 16px;
+
+    width: 100%;
+}
+
+/* =========================
+DROP BOX
+========================= */
+.drop-box {
+
+    background: rgba(255, 255, 255, 0.95);
+
+    border: 2px dashed #0e85e6;
+
+    border-radius: 15px;
+
+    width: 170px;
+    height: 220px;
+
+    padding: 10px;
+
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+    justify-content: space-between;
+
+    text-align: center;
+
+    overflow: hidden;
+
+    box-sizing: border-box;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    color: #333;
+
+    gap: 10px;
+}
+
+/* =========================
+DRAG ITEMS AREA
+========================= */
+.drag-items.horizontal {
+
+    display: flex;
+    flex-wrap: wrap;
+
+    justify-content: center;
+
+    gap: 18px;
+
+    width: 100%;
+}
+
+/* =========================
+DRAG ITEM
+========================= */
+.drag-item {
+
+    width: 180px;
+    height: 180px;
+
+    object-fit: cover;
+
+    border-radius: 15px;
+    touch-action: none;
+
+    background: rgb(151, 222, 254);
+
+    padding: 6px;
+
+    cursor: grab;
+
+    transition: 0.2s;
+}
+
+.drag-item:active {
+    transform: scale(1.05);
+}
+
+/* =========================
+IMAGE INSIDE BOX
+========================= */
+.drop-box .drag-item {
+
+    width: 100%;
+    height: 140px;
+
+    object-fit: cover;
+
+    border-radius: 12px;
+
+    padding: 0 !important;
+    margin: 0 !important;
+
+    display: block;
+}
+
+.hidden {
+    display: none;
+}
+
+/* =========================
+DESKTOP
+========================= */
+@media (min-width: 768px) {
+
+    .content {
+
+        width: calc(100% - 40px);
+
+        max-width: none;
+
+        padding: 30px 50px;
+
+        border-radius: 25px;
+
+        margin: 20px auto;
+
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    }
+
+}
+
+/* =========================
+MOBILE
+========================= */
+@media (max-width: 600px) {
+
+    .judul {
+        font-size: 20px;
+    }
+
+    .content {
+
+        width: calc(100% - 16px);
+
+        padding: 12px;
+
+        margin: 8px auto;
+    }
+
+    .drop-boxes.horizontal {
+
+        display: grid;
+
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+
+        gap: 10px;
+
+        width: 100%;
+
+        justify-items: center;
+    }
+
+    .drop-box {
+
+        width: 100%;
+
+        max-width: 135px;
+
+        height: 170px;
+
+        padding: 8px;
+
+        font-size: 12px;
+
+        line-height: 1.2;
+    }
+
+    .drop-box .drag-item {
+
+        width: 100%;
+
+        height: 105px;
+
+        object-fit: cover;
+
+        border-radius: 10px;
+    }
+
+    .drag-item {
+
+        width: 140px;
+        height: 140px;
+    }
+
+    .answer-btn {
+
+        font-size: 14px;
+
+        padding: 10px;
+
+        max-width: 230px;
+    }
+
+}

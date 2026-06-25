@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700&family=Nunito:wght@400;600&display=swap"
+        rel="stylesheet">
+
+    <!-- External CSS -->
+    <link rel="stylesheet" href="login.css">
+</head>
+
+<body>
+
+    <div class="background"></div>
+
+    <div class="judul">
+        <h1>Game Pembinaan Remaja</h1>
+        <p>(Al-Mumtaza)</p>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <img src="/LOGO1.png" class="logo">
+            <h3>Login</h3>
+
+            <form action="/login" method="POST"> <!--Saat tombol LOGIN ditekan data kirim(POST)-->
+                <input type="email" name="email" placeholder="Email" required>
+                <input type="password" name="password" placeholder="Kata Sandi" required>
+                <button type="submit">LOGIN</button>
+            </form>
+
+            <p>Belum punya akun?</p>
+            <a href="/register">Daftar</a>
+        </div>
+    </div>
+
+    <!-- EJS: Cek apakah ada variabel error dari server -->
+    <% if (error) { %>
+        <div class="modal-overlay" id="errorModal">
+            <div class="modal-box">
+                <h3>⚠️ Login Gagal</h3>
+                <p>
+                    <%= error %>
+                </p>
+
+                <!-- Tombol untuk menutup modal -->
+                <!-- Saat diklik akan menjalankan fungsi tutupModal() -->
+                <button onclick="tutupModal()">
+                    Oke Mengerti
+                </button>
+            </div>
+        </div>
+        <% } %>
+
+            <script>
+
+                // Fungsi untuk menutup modal error
+                function tutupModal() {
+                    // Cari elemen yang memiliki id="errorModal" dan tampilan eror ditutup
+                    document.getElementById('errorModal').style.display = 'none';
+                }
+                // Mengambil parameter yang ada di URL = login?success=register
+                const params = new URLSearchParams(window.location.search);
+
+                // Cek apakah parameter success bernilai register
+                if (params.get('success') === 'register') {
+                    //Variabel notif tidak akan diganti ke nilai lain.
+                    // Membuat elemen div baru
+                    const notif = document.createElement('div');
+
+                    // Menambahkan class CSS agar notifikasi memiliki style
+                    notif.classList.add('success-notif');
+
+                    // Isi teks notifikasi
+                    notif.innerHTML = `🎉 Horeyy berhasil membuat akun!`;
+
+                    // Menambahkan notifikasi ke halaman web
+                    document.body.appendChild(notif);
+
+                    // Tunggu 3.5 detik
+                    setTimeout(() => {
+                        notif.remove();// otif hilang/ hapus dari halaman
+                    }, 3500);
+                }
+            </script>
+
+</body>
+
+</html>

@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+
+    <title>Level 3 - Sosial</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="/sosial_3.css">
+</head>
+
+<body>
+
+    <!-- Background -->
+    <div class="background"></div>
+
+    <!-- Username -->
+    <div class="user-info">
+        👤 <%= user.username %>
+    </div>
+
+    <!-- Point -->
+    <div class="point-box">
+        ⭐ <span id="point">0</span> / 1150
+    </div>
+
+    <!-- BUTTON PETUNJUK -->
+    <button id="openGuide" class="guide-btn" onclick="openGuide()">
+        Petunjuk 🎮
+    </button>
+
+    <!-- CARD PETUNJUK -->
+    <div id="guideCard" class="guide-card hidden">
+
+        <button class="guide-back" onclick="closeGuide()">
+            ⬅
+        </button>
+
+        <h3>📖 Petunjuk Permainan</h3>
+
+        <ul>
+            <li>Baca soal dengan teliti.</li>
+            <li>Susun huruf hingga menjadi jawaban yang benar.</li>
+            <li>Gunakan tombol hapus jika salah memilih huruf.</li>
+            <li>Jawaban benar akan menambah poin.</li>
+            <li>Jika salah akan muncul nasihat, point belum terhitung </li>
+            <li>Selesaikan semua soal untuk membuka ending.</li>
+        </ul>
+
+    </div>
+
+    <!-- Tombol kembali -->
+    <a href="/level/sosial" id="backButton">
+        <img src="/back.png" alt="Back" />
+    </a>
+
+    <!-- ========================= -->
+    <!-- GAME CONTAINER -->
+    <!-- ========================= -->
+
+    <main class="container">
+
+        <div class="content">
+
+            <h2 class="judul" id="judulSoal">
+                Narasi Soal
+            </h2>
+
+            <!-- Gambar Soal -->
+            <div class="image-box">
+
+                <img id="gambarSoal" src="/Bermain/sosial/tiga/empati.png" alt="Soal">
+
+            </div>
+
+            <!-- Kotak Jawaban -->
+            <div id="jawabanBox" class="jawaban-box">
+            </div>
+
+            <!-- Tombol Hapus -->
+            <button onclick="hapusHuruf()" class="btn-hapus">
+                ⌫ Hapus
+            </button>
+
+            <!-- Huruf Acak -->
+            <div id="hurufBox" class="huruf-box">
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- ========================= -->
+    <!-- NASIHAT -->
+    <!-- ========================= -->
+
+    <div id="character" class="character hidden">
+
+        <img src="/nasihat.gif" alt="Karakter">
+
+        <div id="nasihatBox" class="nasihat hidden">
+
+            <!-- Text Nasihat -->
+            <p id="textNasihat"></p>
+
+            <!-- Tombol Ulang -->
+            <button onclick="ulangSoal()" class="next-level">
+                Ulang 🔄
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- ========================= -->
+    <!-- ENDING -->
+    <!-- ========================= -->
+
+    <div id="endingBox" class="character hidden">
+
+        <img src="/CharMaterii.gif" alt="Karakter">
+
+        <div class="nasihat">
+
+            <p id="endingText"></p>
+
+            <button onclick="goHome()" class="next-level">
+                Selesai 🏠
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- NOTIF BENAR -->
+    <div id="notifBenar" class="notif-benar hidden">
+        <p id="textBenar"></p>
+    </div>
+
+    <!-- NOTIF SALAH -->
+    <div id="notifSalah" class="notif-salah hidden">
+        <p>
+            🌿 Jawaban belum tepat, yuk coba lagi dengan teliti.
+        </p>
+    </div>
+
+    <!-- Audio Nasihat -->
+    <audio id="audioNasihat"></audio>
+    <!-- Audio Ketik -->
+    <audio id="audioKetik" src="/Bermain/sosial/tiga/ketik.mp3"></audio>
+    <!-- Audio Benar -->
+    <audio id="audioBenar" src="/Bermain/sosial/tiga/benar.mp3"></audio>
+    <!-- Audio Salah -->
+    <audio id="audioSalah" src="/Bermain/sosial/tiga/salah.mp3"></audio>
+
+    <audio id="bgm" autoplay loop>
+        <source src="/audio/backsound.mp3" type="audio/mpeg">
+    </audio>
+
+    <script src="/js/audioManager.js"></script>
+
+    <script>
+
+        // =========================
+        // DATA SOAL
+        // =========================
+
+        const soalList = [
+
+            {
+                jawaban: "EMPATI",
+                gambar: "/Bermain/sosial/tiga/empati.png",
+                narasi: "Apa sikap yang menunjukkan ikut merasakan perasaan orang lain?",
+                audio: "/Bermain/sosial/tiga/sos3_1.mp3",
+                benarText: "🤍 MasyaaAllah! Empati membuat kita lebih peduli kepada orang lain.",
+                nasihat:
+                    `"Tidak sempurna iman seseorang di antara kalian sampai ia mencintai saudaranya sebagaimana ia mencintai dirinya sendiri." (HR. Bukhari dan Muslim)`
+            },
+
+            {
+                jawaban: "AMANAH",
+                gambar: "/Bermain/sosial/tiga/amanah.png",
+                narasi: "Anti di percaya menjadi ketua kelas. Sikap yang menunjukkan dapat dipercaya disebut?",
+                audio: "/Bermain/sosial/tiga/sos3_2.mp3",
+                benarText: "🌟 Hebat! Orang amanah selalu dipercaya oleh orang lain.",
+                nasihat:
+                    `"Hendaklah kalian berlaku jujur, karena kejujuran membawa kepada kebaikan." (HR. Muslim)`
+            },
+
+            {
+                jawaban: "SOPAN",
+                gambar: "/Bermain/sosial/tiga/sopan.png",
+                narasi: "sikap hormat kepada guru dan orang lain disebut?",
+                audio: "/Bermain/sosial/tiga/sos3_3.mp3",
+                benarText: "😊 Bagus! Bersikap sopan adalah akhlak mulia.",
+                nasihat:
+                    `"Sesungguhnya orang yang paling aku cintai adalah yang paling baik akhlaknya." (HR. Tirmidzi)`
+            },
+
+            {
+                jawaban: "PEDULI",
+                gambar: "/Bermain/sosial/tiga/peduliii.png",
+                narasi: "Sikap apa yang menunjukkan perhatian kepada orang lain?",
+                audio: "/Bermain/sosial/tiga/sos3_4.mp3",
+                benarText: "💖 Keren! Peduli kepada sesama adalah sikap terpuji.",
+                nasihat:
+                    `"Allah akan menolong seorang hamba selama hamba itu menolong saudaranya." (HR. Muslim)`
+            },
+
+            {
+                jawaban: "TOLONG",
+                gambar: "/Bermain/sosial/tiga/menolongg.png",
+                narasi: "Apa kata yang di ucapkan ketika kita meminta bantuan?",
+                audio: "/Bermain/sosial/tiga/sos3_5.mp3",
+                benarText: "🤝 MasyaaAllah! Meminta tolong dengan baik adalah adab yang benar.",
+                nasihat:
+                    `"Tolong-menolonglah kalian dalam kebaikan dan takwa." (QS. Al-Maidah: 2)`
+            }
+
+        ];
+
+        // =========================
+        // VARIABLE GAME
+        // =========================
+
+        // Level sekarang
+        let levelSekarang =
+            parseInt(
+                sessionStorage.getItem("levelSosial3")
+            ) || 0;
+
+        // Ambil point dari session
+        let point =
+            parseInt(sessionStorage.getItem("point_sosial")) || 0;
+
+        // Ambil element HTML
+        const jawabanBox =
+            document.getElementById("jawabanBox");
+
+        const hurufBox =
+            document.getElementById("hurufBox");
+
+        const gambarSoal =
+            document.getElementById("gambarSoal");
+
+        const judulSoal =
+            document.getElementById("judulSoal");
+
+        const textNasihat =
+            document.getElementById("textNasihat");
+
+        const audioNasihat =
+            document.getElementById("audioNasihat");
+
+        const audioKetik =
+            document.getElementById("audioKetik");
+
+        const audioBenar =
+            document.getElementById("audioBenar");
+
+        const audioSalah =
+            document.getElementById("audioSalah");
+
+        // Jawaban user sementara
+        let jawabanUser = [];
+
+        // =========================
+        // SIMPAN POINT
+        // =========================
+
+        async function savePoint() {
+
+            // simpan local browser
+            sessionStorage.setItem(
+                "point_sosial",
+                point
+            );
+
+            try {
+
+                // kirim ke database
+                await fetch('/save-score/sosial', {
+
+                    method: 'POST',
+
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+
+                    body: JSON.stringify({
+                        score: point,
+                        level: 3
+                    })
+                });
+
+            } catch (err) {
+
+                console.error(
+                    'Gagal simpan score sosial:',
+                    err
+                );
+            }
+        }
+
+        // =========================
+        // UPDATE TAMPILAN POINT
+        // =========================
+
+        function updatePoint() {
+
+            const el =
+                document.getElementById('point');
+
+            el.innerText = point;
+
+            // Efek animasi point
+            el.classList.add("up");
+
+            setTimeout(() => {
+
+                el.classList.remove("up");
+
+            }, 200);
+        }
+
+        // =========================
+        // AMBIL JAWABAN BENAR
+        // =========================
+
+        function getJawabanBenar() {
+
+            return soalList[levelSekarang].jawaban;
+        }
+
+        // =========================
+        // MEMBUAT KOTAK JAWABAN
+        // =========================
+
+        function buatKotak() {
+
+            jawabanBox.innerHTML = "";
+
+            const jawabanBenar =
+                getJawabanBenar();
+
+            for (let i = 0; i < jawabanBenar.length; i++) {
+
+                const box =
+                    document.createElement("div");
+
+                box.classList.add("box");
+
+                jawabanBox.appendChild(box);
+            }
+        }
+
+        // =========================
+        // RANDOM HURUF
+        // =========================
+
+        function randomHuruf() {
+
+            const jawabanBenar =
+                getJawabanBenar();
+
+            // Pecah jawaban jadi array huruf
+            const huruf =
+                jawabanBenar.split("");
+
+            // Huruf tambahan random
+            const alfabet =
+                "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+            // Tambahkan huruf random
+            while (huruf.length < 12) {
+
+                huruf.push(
+                    alfabet[
+                    Math.floor(
+                        Math.random() * alfabet.length
+                    )
+                    ]
+                );
+            }
+
+            // Acak posisi huruf
+            return huruf.sort(() => Math.random() - 0.5);
+        }
+
+        // =========================
+        // TAMPILKAN HURUF
+        // =========================
+
+        function tampilHuruf() {
+
+            hurufBox.innerHTML = "";
+
+            const hurufAcak =
+                randomHuruf();
+
+            hurufAcak.forEach(h => {
+
+                const btn =
+                    document.createElement("button");
+
+                btn.innerText = h;
+
+                btn.classList.add("huruf-btn");
+
+                // Klik huruf
+                btn.onclick = () => pilihHuruf(h);
+
+                hurufBox.appendChild(btn);
+            });
+        }
+
+        // =========================
+        // PILIH HURUF
+        // =========================
+
+        function pilihHuruf(huruf) {
+
+            const jawabanBenar =
+                getJawabanBenar();
+
+            // Jika kotak penuh
+            if (jawabanUser.length >= jawabanBenar.length)
+                return;
+
+            const kotakKosong =
+                document.querySelector(".box:not(.filled)");
+
+            if (!kotakKosong) return;
+
+            // Suara ketik
+            audioKetik.currentTime = 0;
+            audioKetik.play();
+
+            // Isi kotak
+            kotakKosong.innerText = huruf;
+
+            kotakKosong.classList.add("filled");
+
+            // Simpan jawaban user
+            jawabanUser.push(huruf);
+
+            // Cek jawaban
+            cekJawaban();
+        }
+
+        // =========================
+        // CEK JAWABAN
+        // =========================
+
+        function cekJawaban() {
+
+            const jawabanBenar =
+                getJawabanBenar();
+
+            // Jika belum penuh
+            if (jawabanUser.length !== jawabanBenar.length)
+                return;
+
+            const jawaban =
+                jawabanUser.join("");
+
+            // =====================
+            // JAWABAN BENAR
+            // =====================
+
+            if (jawaban === jawabanBenar) {
+
+                // notif benar
+                const notifBenar =
+                    document.getElementById("notifBenar");
+
+                const textBenar =
+                    document.getElementById("textBenar");
+
+                // isi notif sesuai soal
+                textBenar.innerHTML =
+                    soalList[levelSekarang].benarText;
+
+                // tampilkan notif
+                notifBenar.classList.remove("hidden");
+
+                // audio benar bareng notif
+                audioBenar.currentTime = 0;
+                audioBenar.play();
+
+                // tambah point
+                point += 100;
+
+                updatePoint();
+
+                savePoint();
+
+                // setelah audio selesai
+                audioBenar.onended = () => {
+
+                    // hilangkan notif
+                    notifBenar.classList.add("hidden");
+
+                    // lanjut level
+                    levelSekarang++;
+
+                    // semua soal selesai
+                    if (levelSekarang >= soalList.length) {
+
+                        sessionStorage.setItem(
+                            "levelSosial3",
+                            levelSekarang
+                        );
+
+                        showEnding();
+
+                    } else {
+
+                        nextSoal();
+                    }
+                };
+
+            }
+
+            // =====================
+            // JAWABAN SALAH
+            // =====================
+
+            else {
+
+                // notif salah
+                const notifSalah =
+                    document.getElementById("notifSalah");
+
+                notifSalah.classList.remove("hidden");
+
+                // audio salah bareng notif
+                audioSalah.currentTime = 0;
+                audioSalah.play();
+
+                // setelah audio selesai
+                audioSalah.onended = () => {
+
+                    // hilangkan notif
+                    notifSalah.classList.add("hidden");
+
+                    // tampilkan nasihat
+                    tampilNasihat();
+                };
+            }
+        }
+
+        // =========================
+        // SOAL BERIKUTNYA
+        // =========================
+
+        function nextSoal() {
+
+            // SIMPAN LEVEL
+            sessionStorage.setItem(
+                "levelSosial3",
+                levelSekarang
+            );
+
+            // Reset jawaban
+            jawabanUser = [];
+
+            // Ganti gambar
+            gambarSoal.src =
+                soalList[levelSekarang].gambar;
+
+            // Ganti narasi
+            judulSoal.innerText =
+                soalList[levelSekarang].narasi;
+
+            // Buat ulang kotak
+            buatKotak();
+
+            // Tampilkan huruf baru
+            tampilHuruf();
+        }
+
+        // =========================
+        // TAMPIL NASIHAT
+        // =========================
+
+        function tampilNasihat() {
+
+            // Sembunyikan game
+            document.querySelector('.content')
+                .style.display = 'none';
+
+            // Tampilkan karakter
+            document.getElementById('character')
+                .classList.remove('hidden');
+
+            // Tampilkan box nasihat
+            document.getElementById('nasihatBox')
+                .classList.remove('hidden');
+
+            // Tampilkan teks nasihat
+            textNasihat.innerText =
+                soalList[levelSekarang].nasihat;
+
+            audioNasihat.pause();
+            audioNasihat.currentTime = 0;
+            // Ganti audio sesuai soal
+            audioNasihat.src =
+                soalList[levelSekarang].audio;
+
+            /// PAUSE BACKSOUND
+            pauseBGM();
+
+            // Mainkan audio
+            setTimeout(() => {
+
+                audioNasihat.play();
+
+            }, 300);
+
+            // SAAT AUDIO NASIHAT SELESAI
+            audioNasihat.onended = () => {
+
+                // HIDUPKAN LAGI BACKSOUND
+                resumeBGM();
+
+            };
+        }
+
+        // =========================
+        // BUKA PETUNJUK
+        // =========================
+
+        function openGuide() {
+
+            // tampilkan petunjuk
+            document.getElementById("guideCard")
+                .classList.remove("hidden");
+
+            // sembunyikan game
+            document.querySelector(".content")
+                .style.display = "none";
+        }
+
+        // =========================
+        // TUTUP PETUNJUK
+        // =========================
+
+        function closeGuide() {
+
+            // sembunyikan petunjuk
+            document.getElementById("guideCard")
+                .classList.add("hidden");
+
+            // tampilkan game lagi
+            document.querySelector(".content")
+                .style.display = "block";
+        }
+
+        // =========================
+        // ULANG SOAL
+        // =========================
+
+        function ulangSoal() {
+
+            // Stop audio
+            audioNasihat.pause();
+            audioNasihat.currentTime = 0;
+
+            // HIDUPKAN LAGI BACKSOUND
+            resumeBGM();
+
+            // Tampilkan game lagi
+            document.querySelector('.content')
+                .style.display = 'block';
+
+            // Sembunyikan karakter
+            document.getElementById('character')
+                .classList.add('hidden');
+
+            // Sembunyikan box nasihat
+            document.getElementById('nasihatBox')
+                .classList.add('hidden');
+
+            // Reset jawaban
+            jawabanUser = [];
+
+            // Reset kotak
+            buatKotak();
+
+            // Tampilkan huruf lagi
+            tampilHuruf();
+        }
+
+        // =========================
+        // HAPUS HURUF
+        // =========================
+
+        function hapusHuruf() {
+
+            // Jika kosong
+            if (jawabanUser.length === 0)
+                return;
+
+            // Suara ketik
+            audioKetik.currentTime = 0;
+            audioKetik.play();
+
+            // Hapus huruf terakhir
+            jawabanUser.pop();
+
+            // Ambil box terisi terakhir
+            const boxes =
+                document.querySelectorAll(".box.filled");
+
+            const lastBox =
+                boxes[boxes.length - 1];
+
+            if (lastBox) {
+
+                lastBox.innerText = "";
+
+                lastBox.classList.remove("filled");
+            }
+        }
+
+        // =========================
+        // TAMPILKAN ENDING
+        // =========================
+
+        function showEnding() {
+
+            savePoint();
+            sessionStorage.setItem(
+                "level3_sosial",
+                "true"
+            );
+
+            // Sembunyikan game
+            document.querySelector('.content')
+                .style.display = 'none';
+
+            // Sembunyikan karakter gagal
+            document.getElementById("character")
+                .classList.add("hidden");
+
+            document.getElementById("nasihatBox")
+                .classList.add("hidden");
+
+            // Ambil element ending
+            const endingBox =
+                document.getElementById("endingBox");
+
+            const endingText =
+                document.getElementById("endingText");
+
+            // Tampilkan ending
+            endingBox.classList.remove("hidden");
+
+            // =====================
+            // ENDING BERDASARKAN POINT
+            // =====================
+
+            if (point >= 1000) {
+
+                endingText.innerText =
+                    "MasyaAllah… Kamu tidak hanya tahu kebaikan, tapi juga melakukannya dengan konsisten. 🤲 Kamu menjaga hubungan dengan sesama, membantu, dan menjauhi keburukan. 🌿 Kamu termasuk orang yang layak menjadi teladan dan menuju Surga.";
+
+            }
+            else if (point >= 850) {
+
+                endingText.innerText =
+                    "Kamu sudah mampu membedakan mana yang baik dan buruk dalam kehidupan sosial. Sikapmu membawa manfaat bagi orang lain. 🌙 Kamu sudah dekat dengan nilai-nilai penghuni Surga.";
+
+            }
+            else if (point >= 700) {
+
+                endingText.innerText =
+                    "Kamu sudah menunjukkan kepedulian terhadap orang lain. Tapi terkadang masih ragu dalam bersikap. 🌿 Teruslah belajar… kamu sedang menuju pribadi yang lebih baik.";
+
+            }
+            else if (point >= 500) {
+
+                endingText.innerText =
+                    "Kamu sudah mulai memahami mana yang baik dan buruk… Tapi dalam kehidupan sosial, kamu masih perlu belajar lebih banyak. 🌱 Perbaiki hubunganmu dengan sesama… karena itu jalan menuju Surga.";
+
+            }
+            else {
+
+                endingText.innerText =
+                    "Kamu masih perlu banyak belajar tentang kehidupan sosial. Terus perbaiki dirimu dan hubunganmu dengan sesama.";
+            }
+        }
+
+        // =========================
+        // KEMBALI KE HOME
+        // =========================
+
+        function goHome() {
+
+            savePoint();
+
+            window.location.href = "/";
+        }
+
+        // =========================
+        // START GAME
+        // =========================
+
+        updatePoint();
+
+        // Kalau semua soal sudah selesai
+        const selesai =
+            sessionStorage.getItem(
+                "level3_sosial"
+            );
+
+        if (selesai === "true") {
+
+            showEnding();
+
+        }
+        else if (levelSekarang >= soalList.length) {
+
+            showEnding();
+
+        }
+        else {
+
+            nextSoal();
+        }
+    </script>
+
+</body>
+
+</html>

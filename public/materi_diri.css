@@ -1,0 +1,284 @@
+/* =========================
+RESET
+========================= */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* =========================
+BODY
+========================= */
+body {
+    font-family: 'Poppins', 'Nunito', sans-serif;
+    background: #0b1e3c;
+    color: #fff;
+    overflow-x: hidden;
+}
+
+/* =========================
+BACKGROUND
+========================= */
+.background {
+    position: fixed;
+    inset: 0;
+    background: url('/BG.png') center/cover no-repeat;
+    z-index: -1;
+}
+
+/* =========================
+USER INFO
+========================= */
+.user-info {
+    position: fixed;
+    top: 15px;
+    left: clamp(10px, 3vw, 20px);
+    background: rgba(255, 255, 255, 0.85);
+    color: #0b1e3c;
+    padding: 8px 15px;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: clamp(12px, 2.5vw, 14px);
+    z-index: 10;
+}
+
+/* =========================
+CONTAINER
+========================= */
+.container {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    overflow: hidden;
+}
+
+/* =========================
+CONTENT
+========================= */
+.content {
+    width: 100%;
+    max-width: 1100px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+/* =========================
+SLIDE (CARD BESAR)
+========================= */
+.slide {
+    display: none;
+    width: min(92vw, 900px);
+    height: 80dvh;
+
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: auto;
+    scrollbar-color: #2e7d32 rgba(255, 255, 255, 0.25);
+    scroll-behavior: smooth;
+    scrollbar-gutter: stable both-edges;
+
+    padding: 25px;
+    border-radius: 25px;
+
+    background: rgba(148, 216, 235, 0.8);
+
+    text-align: center;
+}
+
+/* ACTIVE */
+.slide.active {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: fadeUp 0.5s ease;
+    align-items: center;
+    /* tetap center */
+}
+
+/* =========================
+INNER CARD (ISI UTAMA)
+========================= */
+.inner-card.full {
+    width: 100%;
+    max-width: min(750px, 100%);
+    max-height: 100%;
+    overflow-y: auto;
+    background: rgba(255, 255, 255, 0.9);
+    padding: clamp(16px, 3vw, 25px);
+    border-radius: 20px;
+
+    backdrop-filter: blur(6px);
+}
+
+
+/* =========================
+HEADER CARD
+========================= */
+.header-card {
+    background: linear-gradient(135deg, #c8e6c9, #a5d6a7);
+    padding: 15px;
+    border-radius: 16px;
+    margin-bottom: 15px;
+
+    border: 3px solid #2e7d32;
+    /* TAMBAHAN */
+}
+
+/* =========================
+HEADER
+========================= */
+.slide-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* =========================
+IMAGE
+========================= */
+.slide-header img {
+    width: clamp(160px, 28vw, 240px);
+    margin-bottom: 15px;
+}
+
+/* =========================
+TITLE
+========================= */
+.slide h2 {
+    font-size: clamp(20px, 4.5vw, 30px);
+    font-weight: 700;
+    text-align: center;
+
+    background: linear-gradient(90deg, #2e7d32, #f9a825);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.slide h2::after {
+    content: "";
+    display: block;
+    width: 60px;
+    height: 4px;
+    background: linear-gradient(90deg, #2e7d32, #f9a825);
+    margin: 8px auto 10px;
+    border-radius: 10px;
+}
+
+/* =========================
+TEXT
+========================= */
+.inner-card p {
+    font-size: clamp(17px, 3.5vw, 24px);
+    line-height: 1.6;
+
+    color: #2c3e50;
+    margin-top: 15px;
+
+    padding: 15px 20px;
+    border: 3px dashed rgba(129, 199, 132, 0.8);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.5);
+}
+
+/* =========================
+NAV
+========================= */
+.nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+    background: none;
+    border: none;
+}
+
+.nav.prev {
+    left: -20px;
+}
+
+.nav.next {
+    right: -20px;
+}
+
+.nav img {
+    width: clamp(32px, 5vw, 45px);
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.nav img:hover {
+    transform: scale(1.1);
+}
+
+.nav:active {
+    transform: translateY(-50%) scale(0.95);
+}
+
+/* =========================
+BACK BUTTON
+========================= */
+.back-icon {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+}
+
+.back-icon img {
+    width: clamp(32px, 7vw, 42px);
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+.back-icon img:hover {
+    transform: scale(1.15);
+}
+
+.back-icon img:active {
+    transform: scale(0.9);
+}
+
+/* =========================
+ANIMATION
+========================= */
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+video {
+    margin: 20px 0;
+    border-radius: 12px;
+}
+
+/* =========================
+RESPONSIVE
+========================= */
+
+@media (max-width: 768px) {
+    .slide {
+        width: 88vw;
+        max-height: 70dvh;
+        padding: 18px;
+        border-radius: 18px;
+    }
+
+    .inner-card.full {
+        padding: 14px;
+    }
+
+
+}

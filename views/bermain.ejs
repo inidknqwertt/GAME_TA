@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8"> <!--memberi tahu browser cara membaca huruf dan simbol dalam file HTML-->
+    <title>Bermain</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- PAKAI CSS YANG SAMA -->
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+
+    <!-- BACKGROUND -->
+    <div class="background"></div>
+
+    <!-- USER -->
+    <div class="user-info">
+        👤 <%= user.username %>
+    </div>
+
+    <audio id="bgm" autoplay loop>
+        <source src="/audio/backsound.mp3" type="audio/mpeg">
+    </audio>
+
+    <script src="/js/audioManager.js"></script>
+
+    <!--main, Menandai konten utama halaman-->
+    <main class="container">
+        <div class="content">
+
+            <!-- JUDUL -->
+            <h1 class="menu-title">Let’s go Bermain!</h1>
+
+            <!-- MENU -->
+            <div class="menu">
+                <a href="/level/diri">
+                    <button type="button">Pembinaan Diri</button>
+                </a>
+
+                <a href="/level/sosial">
+                    <button type="button">Pembinaan Sosial</button>
+                </a>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- KARAKTER -->
+    <div class="character">
+        <img src="/CharMaterii.gif" alt="Karakter">
+    </div>
+
+    <!-- BACK -->
+    <a href="/" class="back-icon">
+        <img src="/back.png" alt="Kembali">
+    </a>
+
+</body>
+
+</html>

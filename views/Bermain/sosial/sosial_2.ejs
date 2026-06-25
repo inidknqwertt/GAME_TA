@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Level 2 - Sosial</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="/sosial_2.css">
+
+</head>
+
+
+<body>
+
+    <div class="background"></div>
+
+    <div class="user-info">
+        👤 <%= user.username %>
+    </div>
+
+    <div class="point-box">
+        ⭐ <span id="point">0</span> / 1150
+    </div>
+
+    <!-- Tombol kembali -->
+    <a href="/level/sosial" id="backButton">
+        <img src="/back.png" alt="Back" />
+    </a>
+
+
+    <main class="container">
+
+        <div class="content">
+
+            <h2 class="question">
+                Cocokkan perilaku dengan kategori "Baik" atau "Buruk"
+            </h2>
+
+            <p class="subtext">
+                Tarik atau klik gambar ke kategori yang sesuai
+            </p>
+
+            <div class="match-container">
+
+                <div class="left" id="leftSide"></div>
+
+                <div class="right">
+
+                    <div class="drop-box" data-kategori="baik">
+                        Baik
+                    </div>
+
+                    <div class="drop-box" data-kategori="buruk">
+                        Buruk
+                    </div>
+
+                    <div class="drop-box" data-kategori="baik">
+                        Baik
+                    </div>
+
+                    <div class="drop-box" data-kategori="buruk">
+                        Buruk
+                    </div>
+
+                    <div class="drop-box" data-kategori="baik">
+                        Baik
+                    </div>
+
+                </div>
+
+                <svg id="lineCanvas"></svg>
+
+            </div>
+
+            <br>
+
+            <button class="check-btn" onclick="cek()">
+
+                Cek Jawaban
+
+            </button>
+
+        </div>
+
+    </main>
+
+    <button id="openGuide" class="guide-btn" onclick="openGuide()">
+        Petunjuk 🎮
+    </button>
+
+    <!-- CARD PETUNJUK -->
+    <div id="guideCard" class="guide-card hidden">
+
+        <button class="guide-back" onclick="closeGuide()">
+            ⬅
+        </button>
+
+        <h3>📖 Petunjuk Permainan</h3>
+
+        <ul>
+            <li>Harap perhatikan gambar dan kategori! Untuk Soal Drag and Drop cocokan gambar sesuai baik atau buruk
+            </li>
+            <li>Untuk Soal Drag and Drop cocokan gambar sesuai baik atau buruk tidak bisa ditukar ketika salah</li>
+            <li>Jika menggunakan Laptop Tarik gambar ke kategori Baik atau Buruk.</li>
+            <li>Jika menggunakan HP klik gambar kemudian klik kategori Baik atau Buruk.</li>
+            <li>Perhatikan perilaku pada setiap gambar jika salah meletakkan di box jawaban gambar bisa di tukar.</li>
+            <li>Tekan tombol "Cek Jawaban" setelah selesai.</li>
+            <li>Jika jawaban benar akan mendapat poin.</li>
+            <li>Jika salah tidak pindah soal, ulangi, dan cocokan jawaban yang benar</li>
+            <li>Setelah selesai drag-drop akan lanjut ke quiz suara.</li>
+            <li>Dengarkan suara lalu pilih gambar yang sesuai dengan suara quiz.</li>
+            <li>Jika jawaban salah tidak pindah soal, ulangi, dan pilih jawaban yang benar</li>
+            <li>Selesaikan semua soal untuk lanjut level berikutnya.</li>
+        </ul>
+
+    </div>
+
+    <!-- Audio benar -->
+    <audio id="audioBenar" src="/Bermain/sosial/dua/benar.mp3"></audio>
+
+    <!-- Audio salah -->
+    <audio id="audioSalah" src="/Bermain/sosial/dua/salah.mp3"></audio>
+
+    <!-- NOTIF SALAH -->
+    <div id="notifSalah" class="notif-salah hidden">
+        <p>
+            🤍 Jawaban masih belum tepat.<br>
+            Yuk belajar lagi agar lebih baik 🌸
+        </p>
+    </div>
+
+    <!-- NOTIF BENAR -->
+    <div id="notifBenar" class="notif-benar hidden">
+        <p id="textBenar"></p>
+    </div>
+
+    <audio id="bgm" autoplay loop>
+        <source src="/audio/backsound.mp3" type="audio/mpeg">
+    </audio>
+
+    <script src="/js/audioManager.js"></script>
+
+    <script>
+
+        let fase =
+            sessionStorage.getItem("faseSosial2") || "drag";
+
+        let indexSoalSuara =
+            parseInt(
+                sessionStorage.getItem("indexSoalSuara")
+            ) || 0;
+
+        // =========================
+        // POINT
+        // =========================
+
+        let point =
+            parseInt(
+                sessionStorage.getItem("point_sosial")
+            ) || 0;
+
+        let sudahCek =
+            sessionStorage.getItem(
+                "sudahJawabSosial2"
+            ) === "true";
+
+        // =========================
+        // DRAG DROP DATA
+        // =========================
+
+        const data = [
+
+            {
+                nama: "tetangga",
+                img: "/Bermain/sosial/dua/membicarakan.png",
+                benar: "buruk"
+            },
+
+            {
+                nama: "ejek",
+                img: "/Bermain/sosial/dua/ejek.png",
+                benar: "buruk"
+            },
+
+            {
+                nama: "bantu",
+                img: "/Bermain/sosial/dua/bantu.png",
+                benar: "baik"
+            },
+
+            {
+                nama: "gosip",
+                img: "/Bermain/sosial/dua/gosip.png",
+                benar: "buruk"
+            },
+
+            {
+                nama: "kembali",
+                img: "/Bermain/sosial/dua/kembali.png",
+                benar: "baik"
+            }
+        ];
+
+        // =========================
+        // SOAL SUARA HADIST
+        // =========================
+
+        const soalSuara = [
+
+            {
+                sound:
+                    "/Bermain/sosial/dua/senyum.mp3",
+
+                benar: "senyum",
+
+                benarText:
+                    "😊 MasyaaAllah! Senyum adalah sedekah.",
+
+                pilihan: [
+
+                    {
+                        nama: "senyum",
+                        label: "MENYAPA DENGAN SENYUM",
+                        img: "/Bermain/sosial/dua/senyumm.png"
+                    },
+
+                    {
+                        nama: "ejek",
+                        label: "MENGEJEK TEMAN",
+                        img: "/Bermain/sosial/dua/ejekk.png"
+                    },
+
+                    {
+                        nama: "gosip",
+                        label: "MENGGOSIP",
+                        img: "/Bermain/sosial/dua/gosipp.png"
+                    }
+                ]
+            },
+
+            {
+                sound:
+                    "/Bermain/sosial/dua/bantu.mp3",
+
+                benar: "bantu",
+
+                benarText:
+                    "🤝 Hebat! Membantu teman adalah akhlak mulia.",
+
+                pilihan: [
+
+                    {
+                        nama: "simpati",
+                        label: "MENUNJUKKAN SIMPATI",
+                        img: "/Bermain/sosial/dua/simpati.png"
+
+                    },
+
+                    {
+                        nama: "terbaik",
+                        label: "TEMAN TERBAIK",
+                        img: "/Bermain/sosial/dua/temanterbaik.png"
+                    },
+
+                    {
+                        nama: "bantu",
+                        label: "MEMBANTU SESAMA",
+                        img: "/Bermain/sosial/dua/bantuu.png"
+                    }
+                ]
+            },
+
+            {
+                sound:
+                    "/Bermain/sosial/dua/diam.mp3",
+
+                benar: "diam",
+
+                benarText:
+                    "🤍 Bagus! Diam lebih baik daripada berkata buruk.",
+
+                pilihan: [
+
+                    {
+                        nama: "diam",
+                        label: "DIAM LEBIH BAIK",
+                        img: "/Bermain/sosial/dua/diamm.png"
+                    },
+
+                    {
+                        nama: "menyayangi",
+                        label: "SALING MENYAYANGI",
+                        img: "/Bermain/sosial/dua/menyayangi.png"
+                    },
+
+                    {
+                        nama: "kebersihan",
+                        label: "PEDULI LINGKUNGAN",
+                        img: "/Bermain/sosial/dua/kebersihan.png"
+                    }
+                ]
+            },
+
+            {
+                sound:
+                    "/Bermain/sosial/dua/persaudaraan.mp3",
+
+                benar: "persaudaraan",
+
+                benarText:
+                    "🌸 MasyaaAllah! Persaudaraan membuat hati menjadi indah.",
+
+                pilihan: [
+
+                    {
+                        nama: "jenguk",
+                        label: "MENJENGUK TETANGGA SAKIT",
+                        img: "/Bermain/sosial/dua/jenguk.png"
+                    },
+
+                    {
+                        nama: "persaudaraan",
+                        label: "UKHUWAH SALING MENGUATKAN",
+                        img: "/Bermain/sosial/dua/persaudaraan.png"
+                    },
+
+                    {
+                        nama: "rendahHati",
+                        label: "SOPAN SANTUN",
+                        img: "/Bermain/sosial/dua/rendahHati.png"
+                    }
+                ]
+            }
+
+        ];
+
+
+        // =========================
+        // DRAG DROP
+        // =========================
+
+        let pilihan = {};
+
+        let currentDrag = null;
+
+        const left =
+            document.getElementById("leftSide");
+
+        const svg =
+            document.getElementById("lineCanvas");
+
+        function render() {
+
+            left.innerHTML = "";
+
+            data.forEach(item => {
+
+                const div =
+                    document.createElement("div");
+
+                div.className = "img-item";
+
+                div.draggable = true;
+
+                div.dataset.nama = item.nama;
+
+                div.innerHTML =
+                    `<img src="${item.img}">`;
+
+                div.addEventListener(
+                    "dragstart",
+                    dragStart
+                );
+
+                div.addEventListener(
+                    "touchstart",
+                    touchStart
+                );
+
+                left.appendChild(div);
+            });
+        }
+
+        function dragStart(e) {
+
+            currentDrag =
+                e.currentTarget;
+        }
+
+        function touchStart(e) {
+
+            currentDrag =
+                e.currentTarget;
+        }
+
+        document
+            .querySelectorAll(".drop-box")
+            .forEach(box => {
+
+                box.addEventListener(
+                    "dragover",
+                    e => e.preventDefault()
+                );
+
+                box.addEventListener(
+                    "drop",
+                    e => {
+
+                        e.preventDefault();
+
+                        handleDrop(box);
+                    }
+                );
+
+                box.addEventListener(
+                    "touchend",
+                    e => {
+
+                        e.preventDefault();
+
+                        handleDrop(box);
+                    }
+                );
+            });
+
+        function handleDrop(box) {
+
+            if (
+                sudahCek ||
+                !currentDrag
+            ) return;
+
+            const kategori =
+                box.dataset.kategori;
+
+            const nama =
+                currentDrag.dataset.nama;
+
+            pilihan[nama] = kategori;
+
+            drawLine(currentDrag, box);
+
+            currentDrag = null;
+        }
+
+        function drawLine(from, to) {
+
+            const rect1 =
+                from.getBoundingClientRect();
+
+            const rect2 =
+                to.getBoundingClientRect();
+
+            const svgRect =
+                svg.getBoundingClientRect();
+
+            const line =
+                document.createElementNS(
+                    "http://www.w3.org/2000/svg",
+                    "line"
+                );
+
+            line.setAttribute(
+                "x1",
+                rect1.right - svgRect.left
+            );
+
+            line.setAttribute(
+                "y1",
+                rect1.top +
+                rect1.height / 2 -
+                svgRect.top
+            );
+
+            line.setAttribute(
+                "x2",
+                rect2.left - svgRect.left
+            );
+
+            line.setAttribute(
+                "y2",
+                rect2.top +
+                rect2.height / 2 -
+                svgRect.top
+            );
+
+            line.setAttribute(
+                "stroke",
+                "red"
+            );
+
+            line.setAttribute(
+                "stroke-width",
+                "3"
+            );
+
+            svg.appendChild(line);
+        }
+
+        // =========================
+        // CEK DRAG DROP
+        // =========================
+
+        function cek() {
+
+            let benarSemua = true;
+
+            data.forEach(item => {
+
+                if (
+                    pilihan[item.nama] !== item.benar
+                ) {
+                    benarSemua = false;
+                }
+            });
+
+            // =========================
+            // JIKA SEMUA JAWABAN BENAR
+            // =========================
+            if (benarSemua) {
+
+                // tampil notif benar + audio benar
+                playBenar(
+                    "🌸 MasyaaAllah! Kamu berhasil membedakan perilaku baik dan buruk."
+                );
+
+                // tunggu audio selesai
+                setTimeout(() => {
+
+                    // lanjut ke quiz suara
+                    mulaiQuizSuara();
+
+                }, 1500);
+
+                // reset status jawab
+                sudahCek = false;
+
+                sessionStorage.removeItem(
+                    "sudahJawabSosial2"
+                );
+
+                // simpan fase quiz suara
+                sessionStorage.setItem(
+                    "faseSosial2",
+                    "suara"
+                );
+
+                sessionStorage.setItem(
+                    "indexSoalSuara",
+                    0
+                );
+
+                // tambah point
+                point += 50;
+
+                // update point
+                updatePoint();
+
+                // simpan point
+                savePoint();
+
+                // lanjut ke quiz suara
+                mulaiQuizSuara();
+            }
+
+            else {
+
+                // =========================
+                // AUDIO SAJA (tanpa notif)
+                // =========================
+                const audio = document.getElementById("audioSalah");
+                audio.currentTime = 0;
+                audio.play();
+
+                document.querySelector('.content').innerHTML = `
+            <div class="result-center">
+                <p class="result-text">
+                    Maaf! Jawaban masih ada yang salah. Yuk coba berusaha lagi 🤍
+                </p>
+                <button onclick="mainLagi()" class="result-btn">
+                    Main Lagi
+                </button>
+            </div>
+            `;
+            }
+        }
+
+        // =========================
+        // QUIZ SUARA
+        // =========================
+
+        function mulaiQuizSuara() {
+
+            renderSoalSuara();
+        }
+
+        function renderSoalSuara() {
+
+            const soal =
+                soalSuara[indexSoalSuara];
+
+            document.querySelector(
+                '.content'
+            ).innerHTML = `
+
+                    <div class="audio-quiz">
+
+                        <h2>
+                            Dengarkan Hadist 🎧
+                        </h2>
+
+                        <p>
+                            Pilih gambar yang sesuai
+                        </p>
+
+                        <button
+                            class="audio-btn"
+                            onclick="putarSuara()"
+                        >
+                            ▶ Putar Suara
+                        </button>
+
+                        <div
+                            class="audio-options"
+                            id="audioOptions"
+                        ></div>
+
+                    </div>
+                `;
+
+            const container =
+                document.getElementById(
+                    "audioOptions"
+                );
+
+            soal.pilihan.forEach(p => {
+
+                const item =
+                    document.createElement("div");
+
+                item.className =
+                    "audio-item";
+
+                item.innerHTML = `
+    <img src="${p.img}">
+    <p class="audio-label">${p.label}</p>
+`;
+
+                item.onclick = () =>
+                    cekJawabanSuara(
+                        p.nama,
+                        item
+                    );
+
+                container.appendChild(item);
+            });
+        }
+
+        let currentAudio = null;
+        let isPlaying = false;
+        let lockJawaban = false;
+
+        function putarSuara() {
+
+            // kalau masih mutar, jangan play lagi
+            if (isPlaying) return;
+
+            const soal =
+                soalSuara[indexSoalSuara];
+
+            currentAudio =
+                new Audio(soal.sound);
+
+            isPlaying = true;
+
+            // HENTIKAN BACKSOUND
+            pauseBGM();
+
+            currentAudio.play();
+
+            // saat selesai diputar
+            currentAudio.onended = () => {
+
+                isPlaying = false;
+
+                // LANJUTKAN BACKSOUND
+                resumeBGM();
+            };
+
+            // kalau error / berhenti
+            currentAudio.onerror = () => {
+
+                isPlaying = false;
+
+                // LANJUTKAN BACKSOUND
+                resumeBGM();
+            };
+        }
+
+        function cekJawabanSuara(
+            jawaban,
+            element
+        ) {
+
+            if (lockJawaban) return;
+
+            const soal =
+                soalSuara[indexSoalSuara];
+
+            const img =
+                element.querySelector("img");
+            // =========================
+            // BENAR
+            // =========================
+
+            // =========================
+            // JIKA JAWABAN BENAR
+            // =========================
+            if (jawaban === soal.benar) {
+
+                // tampilkan notif benar + audio benar
+                playBenar(soal.benarText);
+
+                // tambahkan efek benar pada gambar
+                img.classList.add("correct");
+
+                // tambah point
+                point += 50;
+
+                // update point di layar
+                updatePoint();
+
+                // simpan point
+                savePoint();
+
+                // tunggu sebentar lalu lanjut soal berikutnya
+                setTimeout(() => {
+
+                    // pindah ke soal berikutnya
+                    indexSoalSuara++;
+
+                    // simpan progress soal
+                    sessionStorage.setItem(
+                        "indexSoalSuara",
+                        indexSoalSuara
+                    );
+
+                    // jika semua soal selesai
+                    if (
+                        indexSoalSuara >=
+                        soalSuara.length
+                    ) {
+
+                        // tampilkan halaman selesai
+                        selesaiGame();
+
+                    } else {
+
+                        // tampilkan soal berikutnya
+                        renderSoalSuara();
+                    }
+
+                }, 800);
+            }
+
+            // =========================
+            // SALAH
+            // =========================
+
+            else {
+
+                // =========================
+                // AUDIO SALAH
+                // =========================
+                playSalah();
+
+                img.classList.add(
+                    "wrong"
+                );
+
+                setTimeout(() => {
+
+                    img.classList.remove(
+                        "wrong"
+                    );
+
+                }, 700);
+            }
+        }
+
+        // =========================
+        // SELESAI
+        // =========================
+
+        function selesaiGame() {
+
+            savePoint();
+
+            // tandai bahwa level sudah selesai
+            sessionStorage.setItem("level2_sosial", "true");
+
+            // tandai fase = selesai (agar tidak kembali ke awal saat reload)
+            sessionStorage.setItem("faseSosial2", "selesai");
+
+            // tampilkan halaman selesai
+            document.querySelector('.content').innerHTML = `
+        <div class="result-center">
+            <h1 class="result-title">SELAMAT! 🎉</h1>
+            <div class="result-point">POINT BERTAMBAH: 50</div>
+            <button onclick="lanjut()" class="next-btn">Next 🚀</button>
+        </div>
+    `;
+        }
+
+        // =========================
+        // UTIL
+        // =========================
+
+        function updatePoint() {
+
+            document.getElementById(
+                'point'
+            ).innerText = point;
+        }
+
+        async function savePoint() {
+
+            // simpan sementara
+            sessionStorage.setItem("point_sosial", point);
+
+            try {
+
+                // kirim ke database
+                await fetch('/save-score/sosial', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        score: point,
+                        level: 2
+                    })
+                });
+
+            } catch (err) {
+
+                console.error('Gagal simpan score sosial:', err);
+            }
+        }
+
+        function lanjut() {
+
+            savePoint();
+
+            window.location.href =
+                "/bermain/sosial/3";
+        }
+
+        function mainLagi() {
+
+            sessionStorage.removeItem(
+                "sudahJawabSosial2"
+            );
+
+            sessionStorage.removeItem(
+                "faseSosial2"
+            );
+
+            sessionStorage.removeItem(
+                "indexSoalSuara"
+            );
+
+            location.reload();
+        }
+
+        function openGuide() {
+
+            // tampilkan card petunjuk
+            document.getElementById("guideCard")
+                .classList.remove("hidden");
+
+            // sembunyikan card soal
+            document.querySelector(".content")
+                .style.display = "none";
+        }
+
+        function closeGuide() {
+
+            // sembunyikan petunjuk
+            document.getElementById("guideCard")
+                .classList.add("hidden");
+
+            // tampilkan lagi card soal
+            document.querySelector(".content")
+                .style.display = "block";
+        }
+
+        // function untuk tampil notif benar
+        // function untuk tampil notif benar
+        function playBenar(text) {
+
+            // ambil notif benar
+            const notif =
+                document.getElementById(
+                    "notifBenar"
+                );
+
+            // ambil text notif
+            const textBenar =
+                document.getElementById(
+                    "textBenar"
+                );
+
+            // isi text notif
+            textBenar.innerHTML = text;
+
+            // tampilkan notif
+            notif.classList.remove(
+                "hidden"
+            );
+
+            // ambil audio benar
+            const audio =
+                document.getElementById(
+                    "audioBenar"
+                );
+
+            // reset audio
+            audio.currentTime = 0;
+
+            // play audio benar
+            audio.play();
+
+            // saat audio selesai
+            audio.onended = () => {
+
+                // sembunyikan notif
+                notif.classList.add(
+                    "hidden"
+                );
+            };
+        }
+
+        // Putar audio salah
+        // function untuk tampil notif salah
+        // function untuk tampil notif salah
+        function playSalah() {
+
+            lockJawaban = true;
+
+            document.querySelectorAll(".audio-item")
+                .forEach(item => {
+                    item.style.pointerEvents = "none";
+                    item.style.opacity = "0.6";
+                });
+
+            const notif =
+                document.getElementById("notifSalah");
+
+            notif.classList.remove("hidden");
+
+            const audio =
+                document.getElementById("audioSalah");
+
+            audio.currentTime = 0;
+
+            audio.play();
+
+            audio.onended = () => {
+
+                notif.classList.add("hidden");
+
+                document.querySelectorAll(".audio-item")
+                    .forEach(item => {
+                        item.style.pointerEvents = "auto";
+                        item.style.opacity = "1";
+                    });
+
+                lockJawaban = false;
+            };
+        }
+
+        // =========================
+        // CEK PROGRESS GAME
+        // =========================
+
+        // tampilkan point terakhir
+        updatePoint();
+
+        // ambil fase
+        fase = sessionStorage.getItem("faseSosial2");
+
+        // cek apakah level sudah selesai
+        const sudahSelesai = sessionStorage.getItem("level2_sosial") === "true";
+
+        // jika sudah selesai → tampil halaman selesai
+        if (sudahSelesai) {
+
+            selesaiGame();
+
+        }
+        // jika masih di quiz suara
+        else if (fase === "suara") {
+
+            mulaiQuizSuara();
+
+        }
+        // selain itu mulai dari awal
+        else {
+
+            render();
+
+        }
+
+    </script>
+
+</body>
+
+</html>

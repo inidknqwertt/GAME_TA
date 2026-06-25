@@ -1,0 +1,224 @@
+/* =========================
+   RESET
+========================= */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* =========================
+   BODY
+========================= */
+body {
+    font-family: 'Nunito', sans-serif;
+    background: #0b1e3c;
+    color: #fff;
+}
+
+/* =========================
+   BACKGROUND
+========================= */
+.background {
+    position: fixed;
+    inset: 0;
+    background: url('/BG.png') center/cover no-repeat;
+    z-index: -1;
+}
+
+/* =========================
+   JUDUL
+========================= */
+.judul {
+    text-align: center;
+    margin-top: clamp(30px, 6vh, 50px);
+    margin-bottom: 20px;
+}
+
+.judul h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(24px, 5vw, 36px);
+    letter-spacing: 2px;
+    text-shadow: 0 2px 15px rgba(0, 150, 255, 0.6);
+}
+
+.judul p {
+    font-size: clamp(14px, 2.5vw, 18px);
+    font-weight: 600;
+    color: #d6ecff;
+    margin-top: 8px;
+}
+
+/* =========================
+   CONTAINER
+========================= */
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* =========================
+   CARD
+========================= */
+.card {
+    width: min(90%, 420px);
+    padding: clamp(20px, 4vw, 32px);
+    border-radius: 20px;
+
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+
+    border: 1px solid rgba(255, 255, 255, 0.2);
+
+    text-align: center;
+
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* =========================
+   TITLE
+========================= */
+.card h3 {
+    font-family: 'Orbitron', sans-serif;
+    margin-bottom: 18px;
+    font-size: clamp(20px, 4vw, 26px);
+    letter-spacing: 1.5px;
+    color: #ffffff;
+}
+
+/* =========================
+   INPUT
+========================= */
+.card input {
+    width: 100%;
+    padding: clamp(10px, 2.5vw, 13px);
+    margin: 10px 0;
+    border: none;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.9);
+    font-size: clamp(13px, 2.5vw, 14px);
+}
+
+.card input:focus {
+    outline: none;
+    box-shadow: 0 0 10px rgba(0, 150, 255, 0.5);
+}
+
+/* =========================
+   BUTTON
+========================= */
+.card button {
+    width: 100%;
+    padding: clamp(10px, 2.5vw, 13px);
+    margin-top: 12px;
+    border: none;
+    border-radius: 14px;
+    background: #00b894;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.25s;
+    font-size: clamp(14px, 2.5vw, 16px);
+}
+
+.card button:hover {
+    background: #009f7a;
+    transform: scale(1.05);
+}
+
+.card button:active {
+    transform: scale(0.97);
+}
+
+/* =========================
+   TEXT
+========================= */
+.card p {
+    margin-top: 18px;
+    font-size: clamp(13px, 2.5vw, 14px);
+    color: #eff2f6;
+    font-weight: 600;
+}
+
+/* =========================
+   LINK
+========================= */
+.card a {
+    display: inline-block;
+    margin-top: 8px;
+    padding: clamp(6px, 2vw, 8px) clamp(12px, 3vw, 16px);
+    border-radius: 8px;
+    background: #007bff;
+    color: #fff;
+    text-decoration: none;
+    font-size: clamp(13px, 2.5vw, 14px);
+    transition: 0.2s;
+}
+
+.card a:hover {
+    background: #0056c7;
+}
+
+/*NOTIF EMAIL SUAH TERDAFTAR*/
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    z-index: 9999;
+}
+
+.modal-box {
+    background: #fff;
+    padding: 25px;
+    width: 320px;
+    border-radius: 15px;
+    text-align: center;
+
+    animation: popup 0.3s ease;
+}
+
+.modal-box h3 {
+    margin-bottom: 10px;
+    color: #ff4d4d;
+}
+
+.modal-box p {
+    margin-bottom: 20px;
+    color: #444;
+}
+
+.modal-box button {
+    background: #4CAF50;
+    color: white;
+    border: none;
+
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+
+    font-weight: bold;
+}
+
+.modal-box button:hover {
+    opacity: 0.9;
+}
+
+@keyframes popup {
+    from {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}

@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Level 1 - Diri</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="/diri_1.css">
+</head>
+
+<body>
+
+    <div class="background"></div>
+
+    <div class="user-info">
+        👤 <%= user.username %>
+    </div>
+
+    <div class="point-box">
+        ⭐ <span id="point">0</span> / 2000
+    </div>
+
+    <!-- BUTTON PETUNJUK -->
+    <!--Membuka petunjuk permainan.-->
+    <button id="openGuide" class="guide-btn" onclick="openGuide()">
+        Petunjuk 🎮
+    </button>
+
+    <!-- CARD PETUNJUK awalnya di sembunyikan -->
+    <div id="guideCard" class="guide-card hidden">
+        <!--Menutup petunjuk-->
+        <button class="guide-back" onclick="closeGuide()">
+            ⬅
+        </button>
+
+        <h3>📖 Petunjuk Permainan</h3>
+
+        <ul>
+            <li>Baca soal dengan teliti.</li>
+            <li>Pilih jawaban yang paling tepat.</li>
+            <li>Jawaban hanya sekali klik dan tidak bisa di klik ulang</li>
+            <li>Jawaban benar akan menambah poin.</li>
+            <li>Jika salah mendapat point tetapi -30 akan muncul nasihat.</li>
+            <li>Gunakan tombol next dan prev untuk berpindah soal.</li>
+            <li>Selesaikan semua soal untuk lanjut level berikutnya</li>
+        </ul>
+
+    </div>
+
+    <!-- PREV BUTTON -->
+    <button id="btnPrev" class="btn-prev" onclick="goPrev()">
+        <img src="/prevv.png" alt="Prev">
+    </button>
+
+    <!-- NEXT BUTTON -->
+    <button id="btnNextNav" class="btn-next" onclick="goNext()">
+        <img src="/nextt.png" alt="Next">
+    </button>
+
+    <main class="container">
+        <div class="content">
+
+            <!-- Judul -->
+            <h2 class="judul">
+                Game - Pembinaan Diri (Satu)
+            </h2>
+
+            <h3 id="nomorSoal">Pertanyaan 1 dari 5</h3>
+
+            <img id="soalImage" class="soal-img hidden">
+            <!--Menampilkan gambar jika soal membutuhkan gambar, awalnya di sembunyikan-->
+
+            <h2 class="question" id="questionText"></h2>
+            <div class="answers" id="answersBox"></div>
+        </div>
+    </main>
+
+    <!-- NOTIF SALAH -->
+    <div id="notifSalah" class="notif-salah hidden">
+        <p>
+            Jawabanmu belum tepat 😊<br>
+            Tetap semangat belajar ya, insyaAllah kamu bisa! 🌟
+        </p>
+    </div>
+
+    <!-- NOTIF BENAR -->
+    <div id="notifBenar" class="notif-benar hidden">
+        <p id="textBenar"></p>
+    </div>
+
+    <!-- KARAKTER + NASIHAT -->
+    <div id="character" class="character hidden">
+        <img src="/nasihat.gif" alt="Karakter">
+
+        <div id="nasihatBox" class="nasihat hidden">
+            <p id="nasihatText"></p>
+
+            <button onclick="lanjut()" class="next-level" id="btnNext">
+                Lanjut 🚀
+            </button>
+        </div>
+    </div>
+
+    <audio id="audioNasihat"></audio>
+    <audio id="audioBenar" src="/Bermain/diri/satu/benar.mp3"></audio>
+    <audio id="audioSalah" src="/Bermain/diri/satu/salah.mp3"></audio>
+
+    <audio id="bgm" autoplay loop>
+        <source src="/audio/backsound.mp3" type="audio/mpeg">
+    </audio>
+
+    <script src="/js/audioManager.js"></script>
+
+    <script>
+        //Ambil nilai point_diri dari sessionStorage, ubah menjadi angka. Jika tidak ada, gunakan nilai 0.
+        let point = parseInt(sessionStorage.getItem("point_diri")) || 0;
+
+        //Menyimpan nomor soal terakhir yang dibuka.
+        // Agar ketika halaman direfresh atau berpindah halaman, pemain tidak kembali ke soal pertama
+        let indexSoal = parseInt(sessionStorage.getItem("indexSoal")) || 0;
+
+        let answered = JSON.parse(sessionStorage.getItem("answered_diri")) || [];
+
+        const soal = [ //CONST = DATA SOAL (TETAP) dalam bentuk array
+            {
+                q: "Manakah perilaku yang menunjukkan muroqobah?",
+                a: [
+                    "Tidak mengambil barang milik orang lain",
+                    "Tidak berkata kasar kepada orang lain",
+                    "Bersedekah kepada orang yang membutuhkan"
+                ],
+                correct: 0,
+                benarText: "🌟 MasyaaAllah! Kamu memahami arti muroqobah kepada Allah.",
+                nasihat: `<h3>🌿 Nasihat</h3>
+                        <p>
+                        "Beribadah kepada Allah seolah-olah engkau melihat-Nya.
+                        Kalaupun engkau tidak bisa melihat-Nya, sungguh Dia melihatmu."
+                        (HR. Bukhari dan Muslim)
+                        </p>
+                        `,
+
+                audio: "/Bermain/diri/satu/nasihat1.mp3"
+            },
+            {
+                q: "Perhatikan gambar berikut, mencerminkan perilaku/adab?",
+                img: "/Bermain/diri/satu/soal2_diri.png",
+                a: ["Muroqobah", "Mujahadah", "Muhasabah", "Taubat"],
+                correct: 1,
+                benarText: "🔥 Hebat! Kamu berhasil mengenali sikap mujahadah.",
+                nasihat: `<h3>🌿 Nasihat</h3>
+                        <p>
+                        "Mukmin yang kuat lebih dicintai Allah daripada mukmin yang lemah, dan pada keduanya ada kebaikan. Bersungguh-sungguhlah terhadap apa yang bermanfaat bagimu, mintalah pertolongan kepada Allah, dan janganlah lemah." (HR. Muslim dari Abu Hurairah)
+                        </p>
+                        `,
+                audio: "/Bermain/diri/satu/nasihat2.mp3"
+            },
+            {
+                q: "Bentuk perilaku yang tidak baik terhadap diri sendiri yaitu?",
+                a: ["Membiarkan diri mengikuti arus trend media sosial yang tidak mendidik", "Menahan emosi", "Meningkatkan semangat belajar", "Menyenangkan hati semua orang"],
+                correct: 0,
+                benarText: "💡 Bagus! Kamu tahu perilaku yang harus dihindari.",
+                nasihat: `<h3>🌿 Nasihat</h3>
+                        <p>
+                        "jiwamu, jika tidak engkau sibukkan dengan kebaikan, makan ia akan menyibukkanmu dengan keburukan." (Imam Hasan Al-Basri)
+                        </p>
+                        `,
+                audio: "/Bermain/diri/satu/nasihat3.mp3"
+            },
+            {
+                q: "Mengapa pengenalan diri penting bagi remaja?",
+                a: ["Agar bisa menilai orang lain", "Agar terlihat baik", "Agar mampu mengambil keputusan yang tepat", "Agar bisa mengikuti tren"],
+                correct: 2,
+                benarText: "🎯 Keren! Kamu paham pentingnya mengenal diri sendiri.",
+                nasihat: `<h3>🌿 Nasihat</h3>
+                        <p>
+                        "Mintalah petunjuk kepada Allah dan janganlah kamu merasa lemah." (HR.Sahih Muslim)
+                        </p>`,
+                audio: "/Bermain/diri/satu/nasihat4.mp3"
+            },
+            {
+                q: "Gambar ini menggambarkan proses memahami diri, potensi, dan tujuan hidup. Ini disebut?",
+                img: "/Bermain/diri/satu/soal5_diri.png",
+                a: ["Pengendalian diri", "Mengenal diri", "Disiplin diri", "Motivasi diri"],
+                correct: 1,
+                benarText: "🚀 Luar biasa! Kamu berhasil memahami konsep mengenal diri.",
+                nasihat: `<h3>🌿 Nasihat</h3>
+                        <p>
+                        "Orang yang cerdas adalah orang yang mampu mengendalikan dirinya dan beramal untuk kehidupan setelah mati." (HR.Sunan At - Tirmidzi)
+                        </p>`,
+                audio: "/Bermain/diri/satu/nasihat5.mp3"
+            },
+        ];
+
+        // Fungsi untuk menampilkan soal ke halaman
+        function renderSoal() {
+
+            // Ambil data soal berdasarkan index saat ini
+            const s = soal[indexSoal];
+
+            //karena index soal mulai 0 maka +1 agar pertanyaan 1 dari 5
+            document.getElementById("nomorSoal").innerText = `Pertanyaan ${indexSoal + 1} dari 5`;
+
+            //untuk mengambil isi property object digunakan tanda titik (.)
+            //Ambil isi property q dari object s.
+            document.getElementById("questionText").innerText = s.q;
+
+            //Ambil elemen gambar soal dan disimpan di variabel imgEl
+            const imgEl = document.getElementById("soalImage");
+            // Jika soal memiliki gambar
+            if (s.img) {
+
+                // Set sumber gambar
+                imgEl.src = s.img;
+
+                // Tampilkan gambar
+                imgEl.classList.remove("hidden");
+
+            } else {
+
+                // Jika tidak ada gambar, sembunyikan elemen gambar
+                imgEl.classList.add("hidden");
+            }
+
+            //Cari elemen HTML yang id-nya answersBox, lalu simpan ke variabel bernama box."
+            const box = document.getElementById("answersBox");
+
+            //Kosongkan isi kotak.
+            box.innerHTML = "";
+
+            //loop semua jawaban = menampilkan semua pilihan jawaban secara otomatis.
+            // karena jawaban beda2 ada yang abc ada yang abcd dst
+            s.a.forEach((jawaban, i) => { //index = i
+                //// Membuat elemen <button> baru dan di simpan di variable btn
+                const btn = document.createElement("button");
+
+                // Menambahkan class CSS
+                // supaya tombol mengikuti style answer-btn
+                btn.className = "answer-btn";
+
+                //Buat teks tombol dengan format A/B/C/D + titik + isi jawaban
+                //mengubah kode ASCII menjadi karakter 65 A
+                btn.innerText = String.fromCharCode(65 + i) + ". " + jawaban;
+
+                //Ketika tombol (btn) diklik, jalankan fungsi pilih() dengan mengirim nomor jawaban (i)/index.
+                btn.onclick = () => pilih(i);
+                // Jika soal ini sudah pernah dijawab
+                if (answered[indexSoal]) {
+
+                    // Nonaktifkan tombol
+                    // agar tidak bisa dijawab ulang
+                    btn.disabled = true;
+
+                    // jawaban benar = hijau
+                    // Jika tombol ini adalah jawaban benar
+                    if (i === s.correct) {
+                        btn.style.backgroundColor = "#28a745";
+                        btn.style.color = "#fff";
+                    }
+
+                    // selain benar = merah
+                    else {
+                        btn.style.backgroundColor = "#dc3545";
+                        btn.style.color = "#fff";
+                    }
+                }
+                //Masukkan elemen btn ke dalam elemen box.
+                box.appendChild(btn);
+            });
+
+            // Ambil tombol navigasi "Next" dan simpn di variable nextBtn
+            const nextBtn = document.getElementById("btnNextNav");
+            //untuk mengecek apakah sudah sampai soal terakhir.
+            if (indexSoal >= 4) {
+                // Sembunyikan tombol Next
+                nextBtn.style.display = "none";
+            } else {
+                // Jika belum soal terakhir
+                // tampilkan tombol Next
+                nextBtn.style.display = "block";
+            }
+
+            //Simpan nomor soal saat ini ke riwayat browser dan ubah URL menjadi #soal-x, supaya tombol Back/Forward browser bisa berpindah antar soal tanpa me-refresh halaman
+            history.pushState({ soal: indexSoal }, "", `#soal-${indexSoal}`);
+        }
+
+        // Fungsi dijalankan saat pengguna memilih jawaban
+        function pilih(i) {
+
+            // Ambil data soal yang sedang aktif & simpan di s
+            const s = soal[indexSoal];
+
+            // Jika soal ini sudah dijawab, hentikan fungsi
+            if (answered[indexSoal]) return;
+
+            // Tandai soal sudah dijawab
+            answered[indexSoal] = true;
+
+            // Simpan status jawaban ke sessionStorage dengan nama answered_diri, 
+            // setelah diubah menjadi string JSON agar bisa disimpan oleh browser
+            sessionStorage.setItem(
+                "answered_diri",
+                JSON.stringify(answered) //JavaScript Object/Array Notation,
+            );
+
+            // Ambil semua tombol jawaban
+            document.querySelectorAll('.answer-btn').forEach((btn, index) => {
+
+                // Nonaktifkan semua tombol agar tidak bisa diklik lagi
+                btn.disabled = true;
+
+                // Jika tombol ini adalah jawaban yang benar
+                if (index === s.correct) {
+
+                    // Warnai hijau
+                    btn.style.backgroundColor = "#28a745";
+                    btn.style.color = "#fff";
+                }
+
+                // Jika bukan jawaban benar
+                else {
+
+                    // Warnai merah
+                    btn.style.backgroundColor = "#dc3545";
+                    btn.style.color = "#fff";
+                }
+            });
+
+            // =========================
+            // JAWABAN BENAR
+            // =========================
+            if (i === s.correct) {
+
+                // Ambil elemen audio benar
+                const audioBenar =
+                    document.getElementById('audioBenar');
+
+                //audio dikembalikan ke awal (detik 0)
+                //setiap jawaban benar selalu memulai suara dari awal
+                audioBenar.currentTime = 0;
+                audioBenar.play();
+
+                // Ambil elemen notifikasi benar
+                const notifBenar =
+                    document.getElementById('notifBenar');
+
+                const textBenar =
+                    document.getElementById('textBenar');
+
+                // Tampilkan pesan keberhasilan
+                textBenar.innerHTML = s.benarText;
+
+                // Tampilkan notifikasi benar
+                notifBenar.classList.remove('hidden');
+
+                // Tambahkan poin 80
+                point += 80;
+
+                // Update tampilan poin
+                updatePoint();
+
+                // Simpan poin
+                savePoint();
+
+                // Tunggu 1,8 detik sebelum lanjut
+                setTimeout(() => {
+                    // Sembunyikan notifikasi benar
+                    notifBenar.classList.add('hidden');
+
+                    // Jika soal terakhir (index ke-4 = soal ke-5)
+                    if (indexSoal === 4) {
+                        // tandai Level 1 selesai
+                        sessionStorage.setItem("level1_diri", "true");
+                        // Hapus index soal lama, level 1 selesai
+                        sessionStorage.removeItem("indexSoal");
+                        // Pindah ke halaman level 2
+                        window.location.href =
+                            "/bermain/diri/2";
+                        //Lalu fungsi berhenti.
+                        return;
+                    }
+                    //Jika bukan soal terakhir
+                    // lanjut soal berikutnya
+                    indexSoal++;
+
+                    sessionStorage.setItem(
+                        "indexSoal",
+                        indexSoal
+                    );
+                    //Jalankan fungsi renderSoal
+                    renderSoal();
+
+                }, 1800);
+            }
+
+            // =========================
+            // JAWABAN SALAH
+            // =========================
+            else {
+                // Ambil elemen audio salah
+                const audioSalah = document.getElementById('audioSalah');
+
+                // Putar audio dari awal
+                audioSalah.currentTime = 0;
+                // play audio salah
+                audioSalah.play();
+
+                // Perhitungan poin:
+                // +70 lalu -30 = total bertambah 40
+                point += 70;
+                point -= 30;
+
+                updatePoint();
+                savePoint();
+
+                // tampil notif salah
+                // Ambil notifikasi salah
+                const notif =
+                    document.getElementById('notifSalah');
+
+
+                // Tampilkan notifikasi salah
+                notif.classList.remove('hidden');
+
+                // setelah audio selesai
+                audioSalah.onended = () => {
+
+                    // Sembunyikan notifikasi
+                    notif.classList.add('hidden');
+
+                    // ubah tombol lanjut
+                    // Jika belum soal terakhir
+                    if (indexSoal < 4) {
+
+                        document.getElementById('btnNext').innerText =
+                            `Lanjut Soal ${indexSoal + 2} 🚀`;
+
+                    // Jika sudah soal terakhir
+                    } else {
+
+                        document.getElementById('btnNext').innerText =
+                            "Lanjut ke Level 2 🚀";
+                    }
+
+                    // tampil nasihat
+                    tampilNasihat();
+                };
+            }
+        }
+
+        function tampilNasihat() {
+            const s = soal[indexSoal];
+
+            document.querySelector('.content').style.display = 'none';
+
+            document.getElementById('character').classList.remove('hidden');
+            document.getElementById('nasihatBox').classList.remove('hidden');
+
+            document.getElementById('nasihatText').innerHTML = s.nasihat;
+
+            const audio = document.getElementById('audioNasihat');
+
+            audio.pause();
+            audio.currentTime = 0;
+            audio.src = s.audio;
+
+            // PAUSE BACKSOUND
+            pauseBGM();
+
+            audio.play();
+
+            // SETELAH NASIHAT SELESAI
+            audio.onended = () => {
+
+                // HIDUPKAN LAGI BACKSOUND
+                resumeBGM();
+            };
+        }
+
+
+        async function savePoint() {
+
+            // simpan sementara di browser
+            sessionStorage.setItem("point_diri", point);
+
+            try {
+
+                await fetch('/save-score/diri', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        score: point,
+                        level: 1
+                    })
+                });
+
+            } catch (err) {
+                console.error('Gagal menyimpan score:', err);
+            }
+        }
+
+        function updatePoint() {
+            const el = document.getElementById('point');
+            el.innerText = point;
+
+            el.classList.add("up");
+            setTimeout(() => el.classList.remove("up"), 200);
+        }
+
+        function lanjut() {
+            const audio = document.getElementById('audioNasihat');
+
+            audio.pause();
+            audio.currentTime = 0;
+
+            // HIDUPKAN LAGI BACKSOUND
+            resumeBGM();
+
+            indexSoal++;
+            sessionStorage.setItem("indexSoal", indexSoal);
+
+            document.getElementById('character').classList.add('hidden');
+            document.getElementById('nasihatBox').classList.add('hidden');
+            document.querySelector('.content').style.display = 'block';
+
+            if (indexSoal < 5) {
+                renderSoal();
+            } else {
+                // tandai Level 1 selesai
+                sessionStorage.setItem("level1_diri", "true");
+
+                sessionStorage.removeItem("indexSoal");
+                window.location.href = "/bermain/diri/2";
+            }
+        }
+
+        function openGuide() {
+            // tampilkan card petunjuk
+            document.getElementById("guideCard")
+                .classList.remove("hidden");
+
+            // sembunyikan card soal
+            document.querySelector(".content")
+                .style.display = "none";
+        }
+
+        function closeGuide() {
+
+            // sembunyikan petunjuk
+            document.getElementById("guideCard")
+                .classList.add("hidden");
+
+            // tampilkan lagi card soal
+            document.querySelector(".content")
+                .style.display = "block";
+        }
+
+        function goPrev() {
+            const audio = document.getElementById('audioNasihat');
+
+            audio.pause();
+            audio.currentTime = 0;
+
+            // HIDUPKAN LAGI BACKSOUND
+            resumeBGM();
+
+            if (indexSoal > 0) {
+                indexSoal--;
+                sessionStorage.setItem("indexSoal", indexSoal);
+
+                document.getElementById('character').classList.add('hidden');
+                document.getElementById('nasihatBox').classList.add('hidden');
+                document.querySelector('.content').style.display = 'block';
+
+                renderSoal();
+            } else {
+                sessionStorage.removeItem("indexSoal");
+                window.location.href = "/level/diri";
+            }
+        }
+
+        function goNext() {
+            const audio = document.getElementById('audioNasihat');
+
+            audio.pause();
+            audio.currentTime = 0;
+
+            // HIDUPKAN LAGI BACKSOUND
+            resumeBGM();
+
+            // wajib jawab dulu
+            if (!answered[indexSoal]) {
+                alert("Jawab soal ini terlebih dahulu.");
+                return;
+            }
+
+            if (indexSoal < 4) {
+                indexSoal++;
+                sessionStorage.setItem("indexSoal", indexSoal);
+
+                document.getElementById('character').classList.add('hidden');
+                document.getElementById('nasihatBox').classList.add('hidden');
+                document.querySelector('.content').style.display = 'block';
+
+                renderSoal();
+            }
+        }
+
+        window.onpopstate = function (event) {
+            if (event.state && event.state.soal !== undefined) {
+                indexSoal = event.state.soal;
+                sessionStorage.setItem("indexSoal", indexSoal);
+
+                document.getElementById('character').classList.add('hidden');
+                document.getElementById('nasihatBox').classList.add('hidden');
+                document.querySelector('.content').style.display = 'block';
+
+                renderSoal();
+            }
+        };
+
+        updatePoint();
+        renderSoal();
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+
+    <!-- Google Fonts (SAMA KAYA LOGIN) -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700&family=Nunito:wght@400;600&display=swap"
+        rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="/register.css">
+</head>
+
+<body>
+
+    <div class="background"></div>
+
+    <div class="judul">
+        <h1>Game Pembinaan Remaja</h1>
+        <p>(Al-Mumtaza)</p>
+    </div>
+
+    <div class="container">
+        <div class="card">
+
+            <h3>Register</h3>
+
+            <form action="/register" method="POST">
+                <input type="text" name="username" placeholder="Nama Lengkap" required>
+                <input type="email" name="email" placeholder="Email" required>
+                <input type="password" name="password" placeholder="Password" required>
+
+                <button type="submit">DAFTAR</button>
+            </form>
+
+            <p>Sudah punya akun?</p>
+            <a href="/login">Login</a>
+
+        </div>
+    </div>
+
+    <% if (error) { %>
+        <div class="modal-overlay" id="errorModal">
+            <div class="modal-box">
+                <h3>⚠️ Registrasi Gagal</h3>
+                <p>
+                    <%= error %>
+                </p>
+
+                <button onclick="tutupModal()">
+                    Oke Mengerti
+                </button>
+            </div>
+        </div>
+        <% } %>
+
+            <script>
+                function tutupModal() {
+                    document.getElementById('errorModal').style.display = 'none';
+                }
+            </script>
+</body>
+
+</html>

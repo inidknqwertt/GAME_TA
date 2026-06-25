@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Pilih Level</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+
+    <!-- BACKGROUND -->
+    <div class="background"></div>
+
+    <!-- USER -->
+    <div class="user-info">
+        👤 <%= user.username %>
+    </div>
+
+    <audio id="bgm" autoplay loop>
+        <source src="/audio/backsound.mp3" type="audio/mpeg">
+    </audio>
+
+    <script src="/js/audioManager.js"></script>
+
+    <!-- CONTENT -->
+    <main class="container">
+        <div class="content">
+
+            <h1 class="menu-title">Pilih Level!</h1>
+
+            <div class="point-box">
+                ⭐ <span id="totalPoint">0</span> / <span id="maxPoint">0</span>
+            </div>
+
+            <p class="level-info">
+                Awali perjalananmu dari <strong>Level 1</strong> dan selesaikan setiap level secara berurutan!
+            </p>
+
+            <div class="level-menu">
+                <a href="/bermain/<%= kategori %>/1">
+                    <button id="level1" class="level-btn">1</button>
+                </a>
+
+                <a href="/bermain/<%= kategori %>/2">
+                    <button id="level2" class="level-btn">2</button>
+                </a>
+
+                <a href="/bermain/<%= kategori %>/3">
+                    <button id="level3" class="level-btn">3</button>
+                </a>
+            </div>
+
+        </div>
+
+        </div>
+    </main>
+
+    <!-- KARAKTER -->
+    <div class="character">
+        <img src="/CharMaterii.gif" alt="Karakter">
+    </div>
+
+    <!-- BACK -->
+    <a href="/bermain" class="back-icon">
+        <img src="/back.png" alt="Kembali">
+    </a>
+    <script>
+        //Point yang ada di halaman level
+        // ambil kategori dari EJS
+        const kategori = "<%= kategori %>";
+
+        let totalPoint = 0;
+        let maxPoint = 0;
+
+        // jika pembinaan diri
+        if (kategori === "diri") {
+            totalPoint =
+                parseInt(sessionStorage.getItem("point_diri")) || 0;
+
+            maxPoint = 2000; // maksimal kategori diri
+        }
+
+        // jika pembinaan sosial
+        if (kategori === "sosial") {
+            totalPoint =
+                parseInt(sessionStorage.getItem("point_sosial")) || 0;
+
+            maxPoint = 1150; // maksimal kategori sosial
+        }
+
+        document.getElementById("totalPoint").innerText = totalPoint;
+        document.getElementById("maxPoint").innerText = maxPoint;
+
+        // =========================
+        // UNLOCK LEVEL
+        // =========================
+        const btn1 = document.getElementById("level1");
+        const btn2 = document.getElementById("level2");
+        const btn3 = document.getElementById("level3");
+
+        const level1Selesai =
+            sessionStorage.getItem(`level1_${kategori}`) === "true";
+
+        const level2Selesai =
+            sessionStorage.getItem(`level2_${kategori}`) === "true";
+
+        const level3Selesai =
+            sessionStorage.getItem(`level3_${kategori}`) === "true";
+
+        // Default
+        btn1.disabled = false;
+        btn2.disabled = true;
+        btn3.disabled = true;
+
+        // Jika level 1 selesai
+        if (level1Selesai) {
+            btn2.disabled = false;
+        }
+
+        // Jika level 2 selesai
+        if (level2Selesai) {
+            btn3.disabled = false;
+        }
+
+        // Jika level 3 selesai (ending)
+        if (level3Selesai) {
+            btn1.disabled = false;
+            btn2.disabled = false;
+            btn3.disabled = false;
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,1338 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+
+    <title>Level 3 - Sulit</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="/diri_3.css">
+
+    <style>
+        /* tombol prev next awalnya disembunyikan */
+        .btn-prev,
+        .btn-next {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Background -->
+    <div class="background"></div>
+
+    <!-- Username -->
+    <div class="user-info">
+        👤 <%= user.username %>
+    </div>
+
+    <!-- Point -->
+    <div class="point-box">
+        ⭐ <span id="point">0</span> / 2000
+    </div>
+
+    <!-- BUTTON PETUNJUK -->
+    <button id="openGuide" class="guide-btn" onclick="openGuide()">
+        Petunjuk 🎮
+    </button>
+
+    <!-- CARD PETUNJUK -->
+    <div id="guideCard" class="guide-card hidden">
+
+        <button class="guide-back" onclick="closeGuide()">
+            ⬅
+        </button>
+
+        <h3>📖 Petunjuk Permainan</h3>
+
+        <ul>
+            <li>Klik tombol kanan dan kiri ntuk menggerakkan karakter.</li>
+            <li>Tangkap semua balon yang jatuh sebelum menyentuh bawah.</li>
+            <li>Jangan sampai ada balon yang terlewat. Jika terlewat gagal dan main lagi</li>
+            <li>Jika semua balon sudah berhasil ditangkap, maka soal akan muncul.</li>
+            <li>Jawab soal dengan teliti untuk mendapatkan point terbaik.</li>
+            <li>Jika jawaban salah, akan muncul nasihat</li>
+            <li>Selesaikan semua soal untuk mendapatkan ending terbaik berdasarkan point yang didapatkan ✨</li>
+        </ul>
+
+    </div>
+
+    <!-- PREV BUTTON -->
+    <button id="btnPrev" class="btn-prev" onclick="goPrev()">
+        <img src="/prevv.png" alt="Prev">
+    </button>
+
+    <!-- NEXT BUTTON -->
+    <button id="btnNextNav" class="btn-next" onclick="goNext()">
+        <img src="/nextt.png" alt="Next">
+    </button>
+
+    <!-- =========================
+         AREA GAME
+    ========================== -->
+    <div class="card">
+
+        <div class="game-area" id="gameArea">
+
+            <!-- Character -->
+            <img src="/CharMateri.gif" id="player" class="player">
+
+            <!-- Tombol -->
+            <div class="controls">
+
+                <button onclick="moveLeft()">⬅️</button>
+                <button onclick="moveRight()">➡️</button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- =========================
+         QUIZ
+    ========================== -->
+    <div id="quizBox" class="quiz hidden">
+
+        <h3 id="questionText"></h3>
+
+        <div class="answers">
+
+            <button onclick="jawab('a')" id="btnA"></button>
+            <button onclick="jawab('b')" id="btnB"></button>
+            <button onclick="jawab('c')" id="btnC"></button>
+            <button onclick="jawab('d')" id="btnD"></button>
+
+        </div>
+
+    </div>
+
+    <!-- NOTIF SALAH -->
+    <div id="notifSalah" class="notif-salah hidden">
+        <p>
+            Jawabanmu belum tepat 😊<br>
+            Jangan menyerah, terus berusaha ya! Allah suka hamba yang mau belajar 📖✨
+        </p>
+    </div>
+    <!-- NOTIF BENAR -->
+    <div id="notifBenar" class="notif-benar hidden">
+        <p id="textBenar"></p>
+    </div>
+
+    <!-- =========================
+         NASIHAT
+    ========================== -->
+    <div id="character" class="character hidden">
+
+        <img src="/nasihat.gif">
+
+        <div id="nasihatBox" class="nasihat hidden">
+
+            <div id="isiNasihat"></div>
+
+            <button onclick="nextAction()" class="next-level" id="nextBtn">
+                Lanjut 🚀
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- =========================
+         ENDING
+    ========================== -->
+    <div id="endingBox" class="character hidden">
+
+        <img src="/CharMaterii.gif">
+
+        <div class="nasihat">
+
+            <p id="endingText"></p>
+
+            <button onclick="goHome()" class="next-level">
+                Kembali ke Home 🏠
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- Tombol kembali -->
+    <a href="/level/diri" id="backButton">
+        <img src="/back.png" alt="Back" />
+    </a>
+
+    <!-- Audio -->
+    <audio id="audioNasihat"></audio>
+
+    <!-- Audio Benar -->
+    <audio id="audioBenar" src="/Bermain/diri/tiga/benar.mp3"></audio>
+
+    <!-- Audio Salah -->
+    <audio id="audioSalah" src="/Bermain/diri/tiga/salah.mp3"></audio>
+
+    <audio id="bgm" autoplay loop>
+        <source src="/audio/backsound.mp3" type="audio/mpeg">
+    </audio>
+
+    <script src="/js/audioManager.js"></script>
+
+    <script>
+        let balonIntervals = []; // simpan semua interval
+        let spawnTimeout = null; // kontrol spawn loop
+        let startGameTimeout = null;
+
+        let isGameActive = true;
+        let isGuideOpen = false;
+
+        let gameMode =
+            sessionStorage.getItem("level3_mode") || "game";
+        // =========================
+        // POINT PLAYER
+        // =========================
+
+        let point =
+            parseInt(sessionStorage.getItem("point_diri")) || 0;
+
+        // =========================
+        // VARIABLE GAME
+        // =========================
+
+        let posisi;
+
+        let balonTotal = 15;
+
+        let tertangkap = 0;
+
+        let missed = 0;
+
+        let gameFinished = false;
+
+        // =========================
+        // INDEX SOAL
+        // =========================
+
+        let currentQuestion =
+            parseInt(
+                sessionStorage.getItem("levelDiri3")
+            ) || 0;
+
+        // =========================
+        // DATA SOAL
+        // =========================
+
+        const questions = [
+
+            {
+                soal: "Seorang remaja aktif mengikuti banyak kegiatan di sekolah. Ia merasa senang ketika mendapat pengakuan dari orang lain, tetapi kadang juga bertanya-tanya apakah semua yang dilakukan benar-benar sesuai dengan dirinya. Dalam situasi seperti itu, sikap yang harus muncul pada diri kita adalah ...",
+
+                a: "A. Mengikuti kegiatan karena merasa itu bagian dari proses berkembang",
+                b: "B. Mulai mempertimbangkan mana kegiatan yang paling nyaman dijalani",
+                c: "C. Berusaha mengenali potensi dan tujuan hidupnya agar tidak hanya mengikuti penilaian orang lain",
+                d: "D. Menyesuaikan diri dengan lingkungan sambil mencari keyakinan diri",
+
+                correct: "c",
+                benarText: "🌟 MasyaaAllah! Kamu memahami pentingnya mengenali tujuan hidup karena Allah.",
+
+
+                poin: {
+                    a: 220,
+                    b: 250,
+                    c: 280,
+                    d: 200
+                },
+
+                audio: "/Bermain/diri/tiga/nasihat3_1.mp3",
+
+                nasihat: `<h3>🌿 Nasihat</h3>
+                <p>
+                “Sesungguhnya amal itu tergantung niatnya.”
+                (HR. Bukhari Muslim)
+                Jawaban Yang Benar C. Berusaha mengenali potensi dan tujuan hidupnya agar tidak hanya mengikuti penilaian orang lain
+                </p>`
+            },
+
+            {
+                soal: "Seorang teman mempercayakan cerita pribadinya kepadamu. Ketika teman lain mulai bertanya dan penasaran, kamu merasa serba salah antara menjaga kepercayaan atau menjaga suasana pertemanan tetap nyaman. Dalam keadaan itu, sikap yang paling tepat adalah ...",
+
+                a: "A. Menjaga kepercayaan teman dengan tidak menyebarkan cerita pribadinya meskipun mendapat tekanan dari teman lain",
+                b: "B. Menceritakan sebagian kecil rahasia agar suasana pertemanan tetap nyaman",
+                c: "C. Mengalihkan pembicaraan tetapi tetap memberi tau tentang masalah temannya",
+                d: "D. Menyebarkan cerita tersebut supaya dianggap terbuka dan setia kawan",
+
+                correct: "a",
+                benarText: "🤝 Hebat! Menjaga amanah adalah tanda akhlak seorang muslim.",
+
+                poin: {
+                    a: 280,
+                    b: 250,
+                    c: 230,
+                    d: 210
+                },
+
+                audio: "/Bermain/diri/tiga/nasihat3_2.mp3",
+
+                nasihat: `<h3>🌿 Nasihat</h3>
+                <p>
+                “Tunaikanlah amanah kepada orang yang mempercayaimu.”
+                (HR. Abu Dawud)
+                Jawaban Yang Benar A. Menjaga kepercayaan teman dengan tidak menyebarkan cerita pribadinya meskipun mendapat tekanan dari teman lain
+                </p>`
+            },
+
+            {
+                soal: "Seorang remaja sering merasa kecewa setelah mengikuti tren pergaulan yang sebenarnya tidak sesuai dengan prinsip hidupnya. Ia mulai meluangkan waktu untuk mengevaluasi kesalahan dan menuliskan hal-hal yang perlu diperbaiki dalam dirinya. Sikap tersebut menunjukkan penerapan?",
+
+                a: "A. Muhasabah",
+                b: "B. Mujahadah",
+                c: "C. Muroqobah",
+                d: "D. Taubat",
+
+                correct: "a",
+                benarText: "📖 MasyaaAllah! Kamu memahami arti muhasabah dalam kehidupan.",
+
+                poin: {
+                    a: 280,
+                    b: 250,
+                    c: 230,
+                    d: 210
+                },
+
+                audio: "/Bermain/diri/tiga/nasihat3_3.mp3",
+
+                nasihat: `<h3>🌿 Nasihat</h3>
+                <p>
+                Orang yang cerdas adalah orang yang mampu menghisab (mengevaluasi) dirinya. (HR. Tirmidzi)
+                Jawaban Yang Benar A. Muhasabah
+                </p>`
+            },
+
+            {
+                soal: "Seorang remaja sedang menghadapi banyak tugas sekolah dan masalah pribadi sehingga merasa lelah secara fisik maupun pikiran. Akibatnya, ia mulai menunda ibadah dan merasa salat tepat waktu menjadi lebih berat dilakukan dibanding biasanya. Dalam keadaan seperti itu, sikap yang sebaiknya muncul adalah",
+
+                a: "A. Mengurangi ibadah sementara sampai keadaan emosinya membaik",
+                b: "B. Tetap berusaha melaksanakan ibadah tepat waktu sambil melatih diri agar lebih disiplin dan mendekat kepada Allah",
+                c: "C. Melaksanakan ibadah hanya ketika sedang memiliki waktu luang",
+                d: "D. Menunda ibadah karena merasa kondisi lelah dapat dijadikan alasan",
+
+                correct: "b",
+                benarText: "🕌 Luar biasa! Kamu tetap mengutamakan ibadah walau sedang lelah.",
+
+                poin: {
+                    a: 250,
+                    b: 280,
+                    c: 230,
+                    d: 210
+                },
+
+                audio: "/Bermain/diri/tiga/nasihat3_4.mp3",
+
+                nasihat: `<h3>🌿 Nasihat</h3>
+                <p>
+                “Amalan yang paling dicintai Allah adalah shalat pada waktunya.”
+                (HR. Bukhari).
+                Jawaban Yang Benar B. Tetap berusaha melaksanakan ibadah tepat waktu sambil melatih diri agar lebih disiplin dan mendekat kepada Allah
+                </p>`
+            },
+
+            {
+                soal: "Ketika menerima hasil ujian yang tidak sesuai harapan, seseorang merasa kecewa dan mulai membandingkan dirinya dengan teman lain. Namun di sisi lain, ia sadar bahwa setiap usaha tetap memiliki nilai. Dalam keadaan seperti itu, sikap yang harus anti lakukan adalah ...",
+
+                a: "A. Iri dengan teman yang mendapatkan hasil ujian besar",
+                b: "B. Merenungkan apa yang masih perlu ditingkatkan",
+                c: "C. Menyerah karena hasil ujian tidak sesuai harapan",
+                d: "D. Menerima hasil sambil mencoba memperbaiki diri",
+
+                correct: "d",
+                benarText: "🌱 Bagus sekali! Seorang muslim harus terus memperbaiki diri dan tidak menyerah.",
+
+                poin: {
+                    a: 220,
+                    b: 260,
+                    c: 240,
+                    d: 280
+                },
+
+                audio: "/Bermain/diri/tiga/nasihat3_5.mp3",
+
+                nasihat: `<h3>🌿 Nasihat</h3>
+                <p>
+                “Sungguh menakjubkan urusan orang beriman,
+                semua urusannya adalah baik.”
+                (HR. Muslim)
+                Jawaban Yang Benar D. Menerima hasil sambil mencoba memperbaiki diri
+                </p>`
+            }
+
+        ];
+
+        // =========================
+        // ELEMENT GAME
+        // =========================
+
+        const player =
+            document.getElementById("player");
+
+        const gameArea =
+            document.getElementById("gameArea");
+
+        posisi =
+            (gameArea.offsetWidth - player.offsetWidth) / 2;
+
+        player.style.left = posisi + "px";
+
+
+        // =========================
+        // STOP LOOP
+        // =========================
+        function stopGameLoop() {
+            balonIntervals.forEach(i => clearInterval(i));
+            balonIntervals = [];
+            clearTimeout(spawnTimeout);
+            clearTimeout(startGameTimeout);
+        }
+
+
+        function saveMode(mode) {
+            gameMode = mode;
+            sessionStorage.setItem("level3_mode", mode);
+        }
+
+        // =========================
+        // SIMPAN POINT
+        // =========================
+
+        async function savePoint() {
+
+            // simpan sementara browser
+            sessionStorage.setItem("point_diri", point);
+
+            try {
+
+                // kirim score ke database
+                await fetch('/save-score/diri', {
+                    method: 'POST',
+
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+
+                    body: JSON.stringify({
+                        score: point,
+                        level: 3
+                    })
+                });
+
+            } catch (err) {
+
+                console.error(
+                    'Gagal simpan score:',
+                    err
+                );
+            }
+        }
+
+        // =========================
+        // UPDATE POINT
+        // =========================
+
+        function updatePoint() {
+
+            document.getElementById("point").innerText = point;
+
+        }
+
+        // =========================
+        // HIDE GAME
+        // =========================
+
+        function hideGame() {
+
+            document.querySelector(".card")
+                .classList.add("hidden");
+
+        }
+
+        function openGuide() {
+
+            isGuideOpen = true;
+
+            document.getElementById("guideCard")
+                .classList.remove("hidden");
+
+            // jika sedang game balon
+            if (gameMode === "game") {
+
+                document.querySelector(".card").style.display = "none";
+                document.querySelector(".controls").style.display = "none";
+
+            }
+
+            // jika sedang quiz
+            else {
+
+                document.getElementById("quizBox")
+                    .classList.add("hidden");
+
+            }
+        }
+
+        function closeGuide() {
+
+            isGuideOpen = false;
+
+            document.getElementById("guideCard")
+                .classList.add("hidden");
+
+            // kembali ke game
+            if (gameMode === "game") {
+
+                document.querySelector(".card").style.display = "block";
+                document.querySelector(".controls").style.display = "flex";
+
+            }
+
+            // kembali ke quiz
+            else {
+
+                document.getElementById("quizBox")
+                    .classList.remove("hidden");
+
+            }
+        }
+
+        // =========================
+        // TAMPILKAN NAV
+        // =========================
+
+        function showNavigation() {
+
+            document.getElementById("btnPrev").style.display = "block";
+
+            document.getElementById("btnNextNav").style.display = "block";
+
+            // sembunyikan tombol back saat quiz
+            document.getElementById("backButton").style.display = "none";
+
+        }
+
+        // =========================
+        // GERAK KIRI
+        // =========================
+
+        function moveLeft() {
+
+            posisi -= 60;
+
+            if (posisi < 0)
+                posisi = 0;
+
+            player.style.left = posisi + "px";
+
+        }
+
+        // =========================
+        // GERAK KANAN
+        // =========================
+
+        function moveRight() {
+
+            let max =
+                gameArea.offsetWidth - player.offsetWidth;
+
+            posisi += 60;
+
+            if (posisi > max)
+                posisi = max;
+
+            player.style.left = posisi + "px";
+
+        }
+
+        // =========================
+        // KEYBOARD
+        // =========================
+
+        document.addEventListener("keydown", e => {
+
+            if (e.key === "ArrowLeft")
+                moveLeft();
+
+            if (e.key === "ArrowRight")
+                moveRight();
+
+        });
+
+        // =========================
+        // SPAWN BALON
+        // =========================
+
+        function spawnBalon() {
+            let sudah = 0;
+
+            function spawn() {
+                if (!isGameActive || gameMode !== "game" || sudah >= balonTotal || gameFinished) return;
+
+                const balon = document.createElement("img");
+                balon.src = "/Bermain/diri/tiga/balon.png";
+                balon.classList.add("balon");
+
+                balon.dataset.status = "active";
+
+                balon.style.left = Math.random() * (gameArea.offsetWidth - 60) + "px";
+
+                gameArea.appendChild(balon);
+                jatuhkan(balon);
+
+                sudah++;
+
+                spawnTimeout = setTimeout(spawn, 800);
+            }
+
+            spawn();
+        }
+
+        // =========================
+        // BALON JATUH
+        // =========================
+
+        function jatuhkan(balon) {
+
+            let y = -100;
+
+            // status balon
+            balon.dataset.status = "active";
+
+            const interval = setInterval(() => {
+
+                if (isGuideOpen) return;
+
+                if (!isGameActive || gameMode !== "game") {
+                    clearInterval(interval);
+
+                    if (balon.parentNode) {
+                        balon.remove();
+                    }
+
+                    return;
+                }
+
+                y += 4;
+                balon.style.top = y + "px";
+
+                const b = balon.getBoundingClientRect();
+                const p = player.getBoundingClientRect();
+                const arena = gameArea.getBoundingClientRect();
+
+                // =========================
+                // CEK GAGAL DULU
+                // =========================
+                if (
+                    balon.dataset.status === "active" &&
+                    b.bottom >= arena.bottom
+                ) {
+
+                    balon.dataset.status = "failed";
+
+                    clearInterval(interval);
+
+                    if (balon.parentNode) {
+                        balon.remove();
+                    }
+
+                    missed++;
+
+                    if (!gameFinished) {
+
+                        gameFinished = true;
+
+                        stopGameLoop();
+
+                        document
+                            .querySelectorAll(".balon")
+                            .forEach(x => x.remove());
+
+                        hideGame();
+
+                        tampilPlayerFailed();
+                    }
+
+                    return;
+                }
+
+                // =========================
+                // CEK TERTANGKAP
+                // =========================
+                if (
+                    balon.dataset.status === "active" &&
+                    b.bottom >= p.top &&
+                    b.left < p.right &&
+                    b.right > p.left
+                ) {
+
+                    balon.dataset.status = "caught";
+
+                    clearInterval(interval);
+
+                    if (balon.parentNode) {
+                        balon.remove();
+                    }
+
+                    tertangkap++;
+
+                    if (
+                        tertangkap === balonTotal &&
+                        missed === 0
+                    ) {
+
+                        gameFinished = true;
+
+                        stopGameLoop();
+
+                        document
+                            .querySelectorAll(".balon")
+                            .forEach(x => x.remove());
+
+                        hideGame();
+
+                        setTimeout(() => {
+                            showNavigation();
+                            showQuiz();
+                        }, 500);
+                    }
+
+                    return;
+                }
+
+            }, 20);
+
+            balonIntervals.push(interval);
+        }
+
+        function tampilPlayerFailed() {
+
+            // sembunyikan area game
+            document.querySelector(".card").style.display = "none";
+
+
+            // AUDIO SALAH
+            const audioSalah = document.getElementById("audioSalah");
+
+            audioSalah.pause();
+            audioSalah.currentTime = 0;
+            audioSalah.play();
+
+            document.getElementById("quizBox").classList.add("hidden");
+            document.getElementById("character").classList.remove("hidden");
+            document.getElementById("nasihatBox").classList.remove("hidden");
+
+            document.querySelector("#character img").src = "/CharMaterii.gif";
+
+            document.getElementById("isiNasihat").innerHTML = `
+        <h2>💥 FAILED 💥</h2>
+        <p>Kamu gagal menangkap balon.</p>
+        <p>Coba lebih fokus lagi ya 😊</p>
+    `;
+
+            const nextBtn = document.getElementById("nextBtn");
+            nextBtn.innerText = "Main Lagi 🔄";
+            nextBtn.onclick = restartGame;
+        }
+
+
+        // =========================
+        // RESTART
+        // =========================
+        function restartGame() {
+
+            saveMode("game");
+            isGameActive = true;
+
+            stopGameLoop();
+
+            tertangkap = 0;
+            missed = 0;
+            gameFinished = false;
+
+            posisi = (gameArea.offsetWidth - player.offsetWidth) / 2;
+            player.style.left = posisi + "px";
+
+            document.querySelectorAll(".balon").forEach(b => b.remove());
+
+            document.getElementById("character").classList.add("hidden");
+            document.getElementById("nasihatBox").classList.add("hidden");
+            document.getElementById("quizBox").classList.add("hidden");
+            document.getElementById("endingBox").classList.add("hidden");
+
+            document.querySelector(".card").style.display = "block";
+            document.querySelector(".card").classList.remove("hidden");
+
+            document.getElementById("openGuide").style.display = "block";
+
+            spawnBalon();
+        }
+
+        // =========================
+        // TAMPILKAN SOAL
+        // =========================
+
+        function showQuiz() {
+            saveMode("quiz");
+            document.querySelector(".card").style.display = "none";
+            document.querySelector(".controls").style.display = "none";
+
+            clearTimeout(startGameTimeout);
+            // 🔥 MATIKAN GAME
+            isGameActive = false;
+
+            stopGameLoop();
+
+            balonIntervals = [];
+
+            document.querySelectorAll(".balon").forEach(b => b.remove());
+
+            const q = questions[currentQuestion];
+
+            document.getElementById("questionText")
+                .innerText = q.soal;
+
+            document.getElementById("btnA")
+                .innerText = q.a;
+
+            document.getElementById("btnB")
+                .innerText = q.b;
+
+            document.getElementById("btnC")
+                .innerText = q.c;
+
+            document.getElementById("btnD")
+                .innerText = q.d;
+
+            const sudahJawab =
+                sessionStorage.getItem(`soal_${currentQuestion}`);
+
+            const btnA = document.getElementById("btnA");
+            const btnB = document.getElementById("btnB");
+            const btnC = document.getElementById("btnC");
+            const btnD = document.getElementById("btnD");
+
+            [btnA, btnB, btnC, btnD].forEach(btn => {
+
+
+                btn.disabled = !!sudahJawab;
+
+                // reset warna
+                btn.style.backgroundColor = "";
+                btn.style.color = "";
+            });
+
+            if (sudahJawab) {
+
+                const poin = questions[currentQuestion].poin;
+
+                const jawabanTerbaik =
+                    Object.keys(poin).reduce((a, b) =>
+                        poin[a] > poin[b] ? a : b
+                    );
+
+                const tombol = {
+                    a: btnA,
+                    b: btnB,
+                    c: btnC,
+                    d: btnD
+                };
+
+                Object.keys(tombol).forEach(key => {
+
+                    if (key === jawabanTerbaik) {
+
+                        tombol[key].style.backgroundColor = "#28a745";
+                        tombol[key].style.color = "#fff";
+
+                    } else {
+
+                        tombol[key].style.backgroundColor = "#dc3545";
+                        tombol[key].style.color = "#fff";
+                    }
+                });
+            }
+
+            // =========================
+            // ATUR TOMBOL NEXT
+            // =========================
+
+            const btnNext =
+                document.getElementById("btnNextNav");
+
+            if (currentQuestion === questions.length - 1) {
+
+                btnNext.style.display = "none";
+
+            } else {
+
+                btnNext.style.display = "block";
+            }
+
+            document.getElementById("quizBox")
+                .classList.remove("hidden");
+
+        }
+
+        // =========================
+        // JAWAB SOAL
+        // =========================
+
+        function jawab(p) {
+
+            if (sessionStorage.getItem(`soal_${currentQuestion}`)) {
+                return;
+            }
+
+            sessionStorage.setItem(
+                `soal_${currentQuestion}`,
+                "sudah"
+            );
+
+            document.getElementById("btnA").disabled = true;
+            document.getElementById("btnB").disabled = true;
+            document.getElementById("btnC").disabled = true;
+            document.getElementById("btnD").disabled = true;
+
+            const q = questions[currentQuestion];
+
+            // WARNA JAWABAN
+            const tombol = {
+                a: document.getElementById("btnA"),
+                b: document.getElementById("btnB"),
+                c: document.getElementById("btnC"),
+                d: document.getElementById("btnD")
+            };
+
+            // jawaban benar = hijau
+            tombol[q.correct].style.backgroundColor = "#28a745";
+            tombol[q.correct].style.color = "#fff";
+
+            // jika salah = pilihan yang dipilih merah
+            if (p !== q.correct) {
+                tombol[p].style.backgroundColor = "#dc3545";
+                tombol[p].style.color = "#fff";
+            }
+
+            point += q.poin[p];
+
+            if (p !== q.correct) {
+
+                point -= 30;
+            }
+
+            savePoint();
+            updatePoint();
+
+
+            if (p === q.correct) {
+
+                // AUDIO BENAR
+                const audioBenar =
+                    document.getElementById("audioBenar");
+
+                audioBenar.pause();
+                audioBenar.currentTime = 0;
+                audioBenar.play();
+
+                // TAMPILKAN NOTIF BENAR
+                const notifBenar =
+                    document.getElementById("notifBenar");
+
+                const textBenar =
+                    document.getElementById("textBenar");
+
+                textBenar.innerHTML =
+                    q.benarText;
+
+                notifBenar.classList.remove("hidden");
+
+                setTimeout(() => {
+
+                    notifBenar.classList.add("hidden");
+
+                    // next soal
+                    currentQuestion++;
+
+                    // SIMPAN PROGRESS
+                    sessionStorage.setItem(
+                        "levelDiri3",
+                        currentQuestion
+                    );
+
+                    if (currentQuestion >= questions.length) {
+
+                        cekEnding();
+
+                    } else {
+
+                        showQuiz();
+                    }
+
+                }, 1800);
+            }
+
+            else {
+
+                // AUDIO SALAH
+                const audioSalah = document.getElementById("audioSalah");
+
+                audioSalah.pause();
+                audioSalah.currentTime = 0;
+
+                // tampil notif salah
+                const notif =
+                    document.getElementById("notifSalah");
+
+                notif.classList.remove("hidden");
+
+                // play audio salah
+                audioSalah.play();
+
+                gameMode = "quiz";
+                isGameActive = false;
+
+                stopGameLoop();
+
+                // setelah audio salah selesai
+                audioSalah.onended = () => {
+
+                    // notif hilang
+                    notif.classList.add("hidden");
+
+                    // BARU quiz disembunyikan
+                    document.getElementById("quizBox")
+                        .classList.add("hidden");
+
+                    // tampil karakter
+                    document.getElementById("character")
+                        .classList.remove("hidden");
+
+                    document.getElementById("nasihatBox")
+                        .classList.remove("hidden");
+
+                    const nextBtn =
+                        document.getElementById("nextBtn");
+
+                    nextBtn.onclick = nextAction;
+
+                    if (currentQuestion === questions.length - 1) {
+
+                        nextBtn.innerText = "Ending 🏁";
+
+                    } else {
+
+                        nextBtn.innerText =
+                            `Lanjut Soal ${currentQuestion + 2} 🚀`;
+                    }
+
+                    // tampil nasihat
+                    document.getElementById("isiNasihat").innerHTML =
+                        q.nasihat;
+
+                    // audio nasihat
+                    const audio =
+                        document.getElementById("audioNasihat");
+
+                    audio.pause();
+                    audio.currentTime = 0;
+                    audio.src = q.audio;
+
+                    // PAUSE BACKSOUND
+                    pauseBGM();
+
+                    audio.play();
+
+                    // SETELAH NASIHAT SELESAI
+                    audio.onended = () => {
+
+                        // HIDUPKAN LAGI BACKSOUND
+                        resumeBGM();
+
+                    };
+                };
+            }
+        }
+
+
+        // =========================
+        // LANJUT
+        // =========================
+
+        function nextAction() {
+
+            // STOP AUDIO NASIHAT
+            const audio =
+                document.getElementById("audioNasihat");
+
+            audio.pause();
+            audio.currentTime = 0;
+
+            // HIDUPKAN LAGI BACKSOUND
+            resumeBGM();
+
+            document.getElementById("character")
+                .classList.add("hidden");
+
+            document.getElementById("nasihatBox")
+                .classList.add("hidden");
+
+            currentQuestion++;
+
+            // SIMPAN PROGRESS
+            sessionStorage.setItem(
+                "levelDiri3",
+                currentQuestion
+            );
+
+            if (currentQuestion >= questions.length) {
+
+                cekEnding();
+
+            } else {
+
+                showQuiz();
+            }
+        }
+
+        // =========================
+        // ENDING
+        // =========================
+
+        function cekEnding() {
+
+            // 🔇 STOP SEMUA AUDIO
+            const audioNasihat = document.getElementById("audioNasihat");
+            const audioBenar = document.getElementById("audioBenar");
+            const audioSalah = document.getElementById("audioSalah");
+
+            [audioNasihat, audioBenar, audioSalah].forEach(a => {
+                a.pause();
+                a.currentTime = 0;
+            });
+
+            // matikan game total
+            isGameActive = false;
+            stopGameLoop();
+
+            // hapus semua balon
+            document.querySelectorAll(".balon")
+                .forEach(b => b.remove());
+
+            // sembunyikan area game
+            document.querySelector(".card")
+                .classList.add("hidden");
+
+            // simpan mode quiz saat pindah halaman
+            saveMode("quiz");
+
+            savePoint();
+
+            // tandai level 3 selesai
+            sessionStorage.setItem("level3_diri", "true");
+
+            const endingBox =
+                document.getElementById("endingBox");
+
+            const endingText =
+                document.getElementById("endingText");
+
+            // sembunyikan quiz & nasihat
+            document.getElementById("quizBox")
+                .classList.add("hidden");
+
+            document.getElementById("character")
+                .classList.add("hidden");
+
+            document.getElementById("nasihatBox")
+                .classList.add("hidden");
+
+            // tampilkan ending
+            endingBox.classList.remove("hidden");
+
+            if (point >= 1800) {
+
+                endingText.innerText =
+                    "Kamu selalu menghadirkan Allah dalam setiap pilihanmu. Kamu termasuk orang yang sangat layak menuju Surga🌿";
+
+            }
+
+            else if (point >= 1600) {
+
+                endingText.innerText =
+                    "Kamu sudah banyak melakukan kebaikan. Namun masih ada yang perlu diperbaiki. Kamu sudah dekat dengan Surga… teruskan🌙";
+
+            }
+
+            else if (point >= 1400) {
+
+                endingText.innerText =
+                    "Kamu sudah mulai berusaha menjadi lebih baik. Tapi belum konsisten sepenuhnya. Kamu sedang menuju Surga… tetap berjuang🌱";
+
+            }
+
+            else {
+
+                endingText.innerText =
+                    "Kamu masih sering lalai dalam pilihanmu. Yuk mulai perbaiki diri… Surga masih bisa kamu kejar🌱";
+
+            }
+
+        }
+
+        // =========================
+        // HOME
+        // =========================
+
+        function goHome() {
+
+            savePoint();
+
+            window.location.href = "/";
+
+        }
+
+        // =========================
+        // PREV
+        // =========================
+
+        function goPrev() {
+
+            const audio =
+                document.getElementById("audioNasihat");
+
+            audio.pause();
+            audio.currentTime = 0;
+            resumeBGM();
+
+            // kalau di soal pertama -> balik ke level
+            if (currentQuestion === 0) {
+
+                window.location.href = "/level/diri";
+                return;
+            }
+
+            currentQuestion--;
+
+            document.getElementById("character")
+                .classList.add("hidden");
+
+            document.getElementById("nasihatBox")
+                .classList.add("hidden");
+
+            document.getElementById("endingBox")
+                .classList.add("hidden");
+
+            document.getElementById("quizBox")
+                .classList.remove("hidden");
+
+            showQuiz();
+        }
+
+        // =========================
+        // NEXT
+        // =========================
+
+        function goNext() {
+
+            const audio =
+                document.getElementById("audioNasihat");
+
+            audio.pause();
+            audio.currentTime = 0;
+            resumeBGM();
+
+            // WAJIB JAWAB DULU
+            if (!sessionStorage.getItem(`soal_${currentQuestion}`)) {
+
+                alert("Jawab soal ini terlebih dahulu.");
+
+                return;
+            }
+
+            if (currentQuestion < questions.length - 1) {
+
+                currentQuestion++;
+
+                document.getElementById("character")
+                    .classList.add("hidden");
+
+                document.getElementById("nasihatBox")
+                    .classList.add("hidden");
+
+                document.getElementById("endingBox")
+                    .classList.add("hidden");
+
+                document.getElementById("quizBox")
+                    .classList.remove("hidden");
+
+                showQuiz();
+
+            } else {
+
+                cekEnding();
+            }
+        }
+
+        // =========================
+        // START
+        // =========================
+
+        updatePoint();
+
+        // bersihkan semua balon lama
+        document.querySelectorAll(".balon").forEach(b => b.remove());
+
+        // =========================
+        // RESTORE HALAMAN TERAKHIR
+        // =========================
+
+        // Jika sudah pernah masuk quiz
+        if (gameMode === "quiz") {
+
+            // Matikan semua proses game balon
+            isGameActive = false;
+            stopGameLoop();
+
+            // Sembunyikan area game
+            document.querySelector(".card").classList.add("hidden");
+
+            // Jika semua soal sudah selesai,
+            // tampilkan soal terakhir (index terakhir)
+            if (currentQuestion >= questions.length) {
+                currentQuestion = questions.length - 1;
+            }
+
+            // Tampilkan navigasi dan quiz
+            showNavigation();
+            showQuiz();
+        }
+
+        // Jika belum pernah masuk quiz
+        else {
+
+            // Jalankan game balon seperti biasa
+            isGameActive = true;
+
+            // Tampilkan area game
+            document.querySelector(".card").classList.remove("hidden");
+
+            // Mulai spawn balon setelah 4 detik
+            // Mulai spawn balon setelah 4 detik
+            startGameTimeout = setTimeout(() => {
+                spawnBalon();
+            }, 4000);
+        }
+
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,228 @@
+/* =========================
+   RESET DASAR
+========================= */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* =========================
+   BODY
+========================= */
+body {
+    font-family: 'Nunito', sans-serif;
+    background: #0b1e3c;
+    color: #fff;
+    overflow-x: hidden;
+}
+
+/* =========================
+   BACKGROUND
+========================= */
+.background {
+    position: fixed;
+    inset: 0;
+    background: url('/BG.png') center/cover no-repeat;
+    z-index: -1;
+}
+
+/* =========================
+   CONTAINER
+========================= */
+.container {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: clamp(15px, 3vw, 20px);
+}
+
+/* =========================
+   CONTENT
+========================= */
+.content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+/* =========================
+   JUDUL + ANIMASI
+========================= */
+.menu-title {
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: hidden;
+
+    font-size: clamp(28px, 6vw, 42px);
+    font-weight: bold;
+    color: #ffffff;
+    text-shadow: 0 3px 8px rgba(0, 0, 0, 0.45);
+
+    animation: floatTitle 2.5s ease-in-out infinite;
+}
+
+.subtitle {
+    display: inline-block;
+    font-size: clamp(13px, 2.8vw, 18px);
+    color: #ffffffcc;
+    animation: slideLeft 1.5s ease-out;
+}
+
+.title-top {
+    display: inline-block;
+    animation: slideRight 1.5s ease-out;
+}
+
+
+/* =========================
+   MENU
+========================= */
+.menu {
+    width: min(95%, 360px);
+    /* sebelumnya 280px */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+
+/* =========================
+   BUTTON
+========================= */
+.menu button {
+    width: 100%;
+    padding: clamp(12px, 3vw, 16px);
+    margin: clamp(9px, 2.2vw, 12px) 0;
+
+    border-radius: 12px;
+    border: none;
+
+    background: #00b894;
+    color: white;
+
+    font-size: clamp(15px, 3vw, 18px);
+    font-weight: bold;
+
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.menu button:hover {
+    background: #009f7a;
+    transform: scale(1.05);
+}
+
+.menu button:active {
+    transform: scale(0.97);
+}
+
+/* =========================
+   USER INFO
+========================= */
+.user-info {
+    position: fixed;
+    top: 15px;
+    left: clamp(10px, 3vw, 20px);
+    font-weight: bold;
+    background: rgba(255, 255, 255, 0.85);
+    color: #0b1e3c;
+    padding: 8px 15px;
+    border-radius: 10px;
+    font-size: clamp(12px, 2.5vw, 14px);
+}
+
+/* =========================
+   LOGOUT ICON
+========================= */
+.logout-icon {
+    position: fixed;
+    bottom: clamp(12px, 3vw, 20px);
+    right: clamp(12px, 3vw, 20px);
+}
+
+.logout-icon img {
+    width: clamp(42px, 9vw, 58px);
+}
+
+/* =========================
+   KARAKTER
+========================= */
+.character {
+    position: fixed;
+    bottom: 0;
+    left: clamp(30px, 6vw, 80px);
+    z-index: 2;
+    pointer-events: none;
+}
+
+.character img {
+    width: clamp(105px, 22vw, 150px);
+    animation: enterFromLeft 1.2s ease-out forwards;
+}
+
+/* ANIMASI MASUK DARI KIRI */
+@keyframes enterFromLeft {
+    0% {
+        opacity: 0;
+        transform: translateX(-300px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* =========================
+   KEYFRAMES
+========================= */
+@keyframes slideLeft {
+    0% {
+        opacity: 0;
+        transform: translateX(-250px);
+    }
+
+    70% {
+        transform: translateX(20px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideRight {
+    0% {
+        opacity: 0;
+        transform: translateX(250px);
+    }
+
+    70% {
+        transform: translateX(-20px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes floatTitle {
+    0% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-8px);
+    }
+
+    100% {
+        transform: translateY(0px);
+    }
+}
