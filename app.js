@@ -38,7 +38,7 @@ app.use(express.json());
 
 /* ✅ WAJIB: SESSION */
 app.use(session({
-    secret: 'rahasia_yang_penting_super_aman',
+    secret: process.env.SESSION_SECRET || 'rahasia_yang_penting_super_aman',
     resave: false,
     saveUninitialized: true
 }));
@@ -480,7 +480,7 @@ app.use((req, res) => {
 /* =========================
    SERVER
 ========================= */
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
     console.log(`Server jalan di http://localhost:${PORT}`);
