@@ -4,18 +4,16 @@
 CONTENT
 ========================= */
 .content {
-    background-color: #43a047;
+    background: #43a047;
 
     width: calc(100% - 20px);
     max-width: 500px;
 
     padding: 16px;
-
     border-radius: 30px;
 
     display: flex;
     flex-direction: column;
-
     align-items: center;
     text-align: center;
 
@@ -23,7 +21,15 @@ CONTENT
 
     margin: 10px auto;
 
+    min-height: 85vh;
+    max-height: 90vh;
+
+    overflow-y: auto;
     overflow-x: hidden;
+
+    -webkit-overflow-scrolling: touch;
+
+    scroll-behavior: smooth;
 }
 
 /* =========================
