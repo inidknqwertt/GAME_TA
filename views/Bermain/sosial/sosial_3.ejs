@@ -656,19 +656,28 @@
             document.getElementById("guideCard")
                 .classList.add("hidden");
 
-            if (!sedangNasihat) {
+            const nasihatAktif =
+                !document.getElementById("character")
+                    .classList.contains("hidden");
+
+            const endingAktif =
+                !document.getElementById("endingBox")
+                    .classList.contains("hidden");
+
+            // Hanya tampilkan soal jika tidak sedang
+            // menampilkan nasihat maupun ending
+            if (!nasihatAktif && !endingAktif) {
                 document.querySelector(".content")
                     .style.display = "block";
             }
 
         }
-
         // =========================
         // ULANG SOAL
         // =========================
 
         function ulangSoal() {
-            sedangNasihat = true;
+            sedangNasihat = false;
 
             // Stop audio
             audioNasihat.pause();
