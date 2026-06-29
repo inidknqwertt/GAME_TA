@@ -720,6 +720,16 @@
             // =========================
             if (jawaban === soal.benar) {
 
+                // hentikan suara soal jika masih diputar
+                if (currentAudio) {
+                    currentAudio.pause();
+                    currentAudio.currentTime = 0;
+                    currentAudio = null;
+                }
+
+                isPlaying = false;
+                resumeBGM();
+
                 // tampilkan notif benar + audio benar
                 playBenar(soal.benarText);
 

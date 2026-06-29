@@ -235,6 +235,7 @@
         // Ambil point dari session
         let point =
             parseInt(sessionStorage.getItem("point_sosial")) || 0;
+        let sedangNasihat = false;
 
         // Ambil element HTML
         const jawabanBox =
@@ -588,6 +589,7 @@
         // =========================
 
         function tampilNasihat() {
+            sedangNasihat = true;
 
             // Sembunyikan game
             document.querySelector('.content')
@@ -651,13 +653,14 @@
 
         function closeGuide() {
 
-            // sembunyikan petunjuk
             document.getElementById("guideCard")
                 .classList.add("hidden");
 
-            // tampilkan game lagi
-            document.querySelector(".content")
-                .style.display = "block";
+            if (!sedangNasihat) {
+                document.querySelector(".content")
+                    .style.display = "block";
+            }
+
         }
 
         // =========================
@@ -665,6 +668,7 @@
         // =========================
 
         function ulangSoal() {
+            sedangNasihat = true;
 
             // Stop audio
             audioNasihat.pause();

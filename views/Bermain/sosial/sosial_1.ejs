@@ -145,6 +145,7 @@
         let indexSoal = parseInt(sessionStorage.getItem("indexSoal_sosial")) || 0;
         let answered = JSON.parse(sessionStorage.getItem("answered_sosial")) || [];
         let dragSudahDicek = JSON.parse(sessionStorage.getItem("drag_sudahDicek")) || false;
+        let sedangNasihat = false;
 
         const level1Selesai =
             sessionStorage.getItem("level1_sosial") === "true";
@@ -448,133 +449,117 @@
         });
 
         // ========================
-        // CEK DRAG & DROP
-        // ========================
+// CEK JAWABAN DRAG & DROP
+// ========================
+function cekDrag() {
 
-        function cekDrag() {
+    // Cegah tombol "Cek Jawaban" ditekan lebih dari sekali
+    if (dragSudahDicek) return;
 
-            // cegah cek 2x
-            if (dragSudahDicek) return;
+    // Simpan status bahwa soal drag sudah diperiksa
+    dragSudahDicek = true;
+    sessionStorage.setItem("drag_sudahDicek", true);
 
-            dragSudahDicek = true;
-            sessionStorage.setItem("drag_sudahDicek", true);
+    // Nonaktifkan tombol cek jawaban
+    document.querySelector(".answer-btn").disabled = true;
 
-            // nonaktifkan tombol cek
-            document.querySelector(".answer-btn").disabled = true;
+    // Nonaktifkan semua gambar agar tidak bisa dipindahkan lagi
+    document.querySelectorAll(".drag-item")
+        .forEach(i => i.draggable = false);
 
-            // nonaktif drag gambar
-            document.querySelectorAll(".drag-item")
-                .forEach(i => i.draggable = false);
+    let benar = 0;
 
-            let benar = 0;
+    // ========================
+    // HITUNG JUMLAH JAWABAN BENAR
+    // ========================
+    document.querySelectorAll(".drop-box").forEach(box => {
 
-            // hitung jawaban benar
-            document.querySelectorAll(".drop-box").forEach(box => {
+        const item = box.querySelector(".drag-item");
 
-                const item = box.querySelector(".drag-item");
-
-                if (item &&
-                    item.dataset.match === box.dataset.id) {
-
-                    benar++;
-                }
-            });
-
-            // cek semua benar
-            const semuaBenar = (benar === 5);
-
-            // ========================
-            // JAWABAN BENAR
-            // ========================
-
-            if (semuaBenar) {
-
-                point += 80;
-
-                updatePoint();
-                savePoint();
-
-                // ambil audio benar
-                const audioBenar =
-                    document.getElementById("audioBenar");
-
-                // ambil notif benar
-                const notifBenar =
-                    document.getElementById("notifBenar");
-
-                const textBenar =
-                    document.getElementById("textBenar");
-
-                // isi text notif
-                textBenar.innerHTML =
-                    " MasyaaAllah! 🎉 Kamu Hebat! Semua pasangan benar.";
-
-                // tampil notif
-                notifBenar.classList.remove("hidden");
-
-                // play audio benar
-                audioBenar.currentTime = 0;
-                audioBenar.play();
-
-                // lanjut soal berikutnya
-                setTimeout(() => {
-
-                    notifBenar.classList.add("hidden");
-
-                    indexSoal++;
-
-                    renderSoal();
-
-                }, 1800);
-
-            }
-
-            // ========================
-            // JAWABAN SALAH
-            // ========================
-
-            else {
-
-                point += (70 - 30);
-
-                updatePoint();
-                savePoint();
-
-                // ambil audio salah
-                const audioSalah =
-                    document.getElementById("audioSalah");
-
-                // ambil notif salah
-                const notif =
-                    document.getElementById("notifSalah");
-
-                // tampil notif
-                notif.classList.remove("hidden");
-
-                // play audio salah
-                audioSalah.currentTime = 0;
-                audioSalah.play();
-
-                // setelah audio selesai
-                audioSalah.onended = () => {
-
-                    // sembunyikan notif
-                    notif.classList.add("hidden");
-
-                    // ubah teks tombol
-                    if (indexSoal < 4) {
-                        document.getElementById('btnNext').innerText =
-                            `Lanjut Soal ${indexSoal + 2} 🚀`;
-                    } else {
-                        document.getElementById('btnNext').innerText =
-                            "Lanjut ke Level 2 🚀";
-                    }
-
-                    // tampil nasihat
-                    tampilNasihat();
-                };
-            }
+        if (item && item.dataset.match === box.dataset.id) {
+            benar++;
         }
+    });
+
+    // Semua benar jika jumlahnya 5
+    const semuaBenar = (benar === 5);
+
+    // ========================
+    // JAWABAN BENAR
+    // ========================
+    if (semuaBenar) {
+
+        // Tambah poin
+        point += 80;
+
+        updatePoint();
+        savePoint();
+
+        // Ambil elemen
+        const audioBenar = document.getElementById("audioBenar");
+        const notifBenar = document.getElementById("notifBenar");
+        const textBenar = document.getElementById("textBenar");
+
+        // Isi teks notifikasi
+        textBenar.innerHTML =
+            "MasyaaAllah! 🎉 Kamu Hebat! Semua pasangan benar.";
+
+        // Tampilkan notifikasi
+        notifBenar.classList.remove("hidden");
+
+        // Putar audio benar
+        audioBenar.currentTime = 0;
+        audioBenar.play();
+
+        // Setelah beberapa saat lanjut ke soal berikutnya
+        setTimeout(() => {
+
+            notifBenar.classList.add("hidden");
+
+            indexSoal++;
+
+            renderSoal();
+
+        }, 1800);
+
+    }
+
+    // ========================
+    // JAWABAN SALAH
+    // ========================
+    else {
+
+        // Tambah poin sesuai aturan
+        point += (70 - 30);
+
+        updatePoint();
+        savePoint();
+
+        // Ambil elemen
+        const audioSalah = document.getElementById("audioSalah");
+        const notif = document.getElementById("notifSalah");
+
+        // Tampilkan notifikasi salah
+        notif.classList.remove("hidden");
+
+        // Putar audio salah
+        audioSalah.currentTime = 0;
+        audioSalah.play();
+
+        // Setelah audio selesai
+        audioSalah.onended = () => {
+
+            // Sembunyikan notifikasi
+            notif.classList.add("hidden");
+
+            // Tampilkan halaman nasihat
+            // (Tulisan tombol "Lanjut Soal 2", "Lanjut Soal 3", dst.
+            // sudah diatur di dalam fungsi tampilNasihat())
+            tampilNasihat();
+
+        };
+    }
+}
 
         function pilih(i) {
             const s = soal[indexSoal];
@@ -701,7 +686,19 @@
         }
 
         function tampilNasihat() {
+            sedangNasihat = true;
             const s = soal[indexSoal];
+
+            // ===========================
+            // UBAH TULISAN TOMBOL
+            // ===========================
+            const btnNext = document.getElementById("btnNext");
+
+            if (indexSoal < 4) {
+                btnNext.innerText = `Lanjut Soal ${indexSoal + 2} 🚀`;
+            } else {
+                btnNext.innerText = "Lanjut Level 2 🚀";
+            }
 
             document.querySelector('.content').style.display = 'none';
 
@@ -711,8 +708,7 @@
             document.getElementById('nasihatBox')
                 .classList.remove('hidden');
 
-            document.getElementById('nasihatText').innerHTML =
-                s.nasihat;
+            document.getElementById('nasihatText').innerHTML = s.nasihat;
 
             const audio = document.getElementById('audioNasihat');
 
@@ -720,21 +716,17 @@
             audio.currentTime = 0;
             audio.src = s.audio;
 
-            // PAUSE BACKSOUND
             pauseBGM();
 
             audio.play();
 
-            // SAAT NASIHAT SELESAI
             audio.onended = () => {
-
-                // LANJUTKAN BACKSOUND
                 resumeBGM();
-
             };
         }
 
         function lanjut() {
+            sedangNasihat = false;
             const audio = document.getElementById('audioNasihat');
 
             audio.pause();
@@ -882,13 +874,17 @@
 
         function closeGuide() {
 
-            // sembunyikan petunjuk
-            document.getElementById("guideCard")
-                .classList.add("hidden");
+            document.getElementById("guideCard").classList.add("hidden");
 
-            // tampilkan lagi card soal
-            document.querySelector(".content")
-                .style.display = "block";
+            if (sedangNasihat) {
+
+                document.querySelector(".content").style.display = "none";
+
+            } else {
+
+                document.querySelector(".content").style.display = "block";
+
+            }
         }
 
         function updatePoint() {
