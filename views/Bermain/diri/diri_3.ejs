@@ -251,7 +251,6 @@
                 <p>
                 “Sesungguhnya amal itu tergantung niatnya.”
                 (HR. Bukhari Muslim)
-                Jawaban Yang Benar C. Berusaha mengenali potensi dan tujuan hidupnya agar tidak hanya mengikuti penilaian orang lain
                 </p>`
             },
 
@@ -279,7 +278,6 @@
                 <p>
                 “Tunaikanlah amanah kepada orang yang mempercayaimu.”
                 (HR. Abu Dawud)
-                Jawaban Yang Benar A. Menjaga kepercayaan teman dengan tidak menyebarkan cerita pribadinya meskipun mendapat tekanan dari teman lain
                 </p>`
             },
 
@@ -306,7 +304,6 @@
                 nasihat: `<h3>🌿 Nasihat</h3>
                 <p>
                 Orang yang cerdas adalah orang yang mampu menghisab (mengevaluasi) dirinya. (HR. Tirmidzi)
-                Jawaban Yang Benar A. Muhasabah
                 </p>`
             },
 
@@ -334,7 +331,6 @@
                 <p>
                 “Amalan yang paling dicintai Allah adalah shalat pada waktunya.”
                 (HR. Bukhari).
-                Jawaban Yang Benar B. Tetap berusaha melaksanakan ibadah tepat waktu sambil melatih diri agar lebih disiplin dan mendekat kepada Allah
                 </p>`
             },
 
@@ -363,7 +359,6 @@
                 “Sungguh menakjubkan urusan orang beriman,
                 semua urusannya adalah baik.”
                 (HR. Muslim)
-                Jawaban Yang Benar D. Menerima hasil sambil mencoba memperbaiki diri
                 </p>`
             }
 
@@ -487,19 +482,33 @@
             document.getElementById("guideCard")
                 .classList.add("hidden");
 
-            // kembali ke game
+            // jika masih game
             if (gameMode === "game") {
 
                 document.querySelector(".card").style.display = "block";
                 document.querySelector(".controls").style.display = "flex";
-
+                return;
             }
 
-            // kembali ke quiz
-            else {
+            // ===== TAMBAHAN =====
+            const endingVisible =
+                !document.getElementById("endingBox").classList.contains("hidden");
 
-                document.getElementById("quizBox")
-                    .classList.remove("hidden");
+            if (endingVisible) {
+                document.getElementById("endingBox").classList.remove("hidden");
+                return;
+            }
+            // ====================
+
+            if (isNasihat) {
+
+                document.getElementById("character").classList.remove("hidden");
+                document.getElementById("nasihatBox").classList.remove("hidden");
+                document.getElementById("quizBox").classList.add("hidden");
+
+            } else {
+
+                document.getElementById("quizBox").classList.remove("hidden");
 
             }
         }
@@ -747,6 +756,20 @@
         // RESTART
         // =========================
         function restartGame() {
+
+            // STOP SEMUA AUDIO
+            const audioSalah = document.getElementById("audioSalah");
+            const audioBenar = document.getElementById("audioBenar");
+            const audioNasihat = document.getElementById("audioNasihat");
+
+            [audioSalah, audioBenar, audioNasihat].forEach(audio => {
+                audio.pause();
+                audio.currentTime = 0;
+                audio.onended = null; // hapus event lama
+            });
+
+            // hidupkan lagi backsound jika perlu
+            resumeBGM();
 
             saveMode("game");
             isGameActive = true;
@@ -1011,6 +1034,9 @@
                     document.getElementById("quizBox")
                         .classList.add("hidden");
 
+                    // tandai sedang menampilkan nasihat
+                    isNasihat = true;
+
                     // tampil karakter
                     document.getElementById("character")
                         .classList.remove("hidden");
@@ -1068,6 +1094,7 @@
 
         function nextAction() {
 
+            isNasihat = false;
             // STOP AUDIO NASIHAT
             const audio =
                 document.getElementById("audioNasihat");

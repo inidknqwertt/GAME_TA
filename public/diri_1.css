@@ -603,45 +603,11 @@ CARD PETUNJUK
     transform: translateX(-3px);
 }
 
-/* =========================
-TABLET
-========================= */
-@media (max-width: 768px) {
-
-    .guide-card {
-
-        width: 90vw;
-    }
-}
 
 /* =========================
 HP KECIL
 ========================= */
 @media (max-width: 360px) {
-
-    .guide-card {
-
-        width: 96vw;
-
-        padding: 14px;
-
-        border-radius: 16px;
-    }
-
-    .guide-card h3 {
-
-        font-size: 16px;
-    }
-
-    .guide-card ul {
-
-        padding-left: 16px;
-
-        font-size: 12px;
-
-        line-height: 1.6;
-    }
-
     .guide-back {
 
         font-size: 25px;
@@ -739,26 +705,6 @@ HP KECIL
         font-size: 13px;
     }
 
-    .guide-card {
-
-        width: 94vw;
-
-        padding: 18px;
-
-        border-radius: 20px;
-    }
-
-    .guide-card h3 {
-
-        font-size: 18px;
-    }
-
-    .guide-card ul {
-
-        line-height: 1.7;
-
-        font-size: 13px;
-    }
 
     /* BUTTON PETUNJUK MOBILE */
     .guide-btn {

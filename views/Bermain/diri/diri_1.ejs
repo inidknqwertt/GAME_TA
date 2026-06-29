@@ -121,6 +121,7 @@
         let indexSoal = parseInt(sessionStorage.getItem("indexSoal")) || 0;
 
         let answered = JSON.parse(sessionStorage.getItem("answered_diri")) || [];
+        let sedangNasihat = false;
 
         const soal = [ //CONST = DATA SOAL (TETAP) dalam bentuk array
             {
@@ -435,7 +436,7 @@
                         document.getElementById('btnNext').innerText =
                             `Lanjut Soal ${indexSoal + 2} 🚀`;
 
-                    // Jika sudah soal terakhir
+                        // Jika sudah soal terakhir
                     } else {
 
                         document.getElementById('btnNext').innerText =
@@ -449,6 +450,8 @@
         }
 
         function tampilNasihat() {
+            sedangNasihat = true;
+
             const s = soal[indexSoal];
 
             document.querySelector('.content').style.display = 'none';
@@ -521,6 +524,7 @@
             indexSoal++;
             sessionStorage.setItem("indexSoal", indexSoal);
 
+            sedangNasihat = false;
             document.getElementById('character').classList.add('hidden');
             document.getElementById('nasihatBox').classList.add('hidden');
             document.querySelector('.content').style.display = 'block';
@@ -552,9 +556,22 @@
             document.getElementById("guideCard")
                 .classList.add("hidden");
 
-            // tampilkan lagi card soal
-            document.querySelector(".content")
-                .style.display = "block";
+            if (sedangNasihat) {
+
+                // kembali ke tampilan nasihat
+                document.querySelector(".content").style.display = "none";
+
+                document.getElementById("character")
+                    .classList.remove("hidden");
+
+                document.getElementById("nasihatBox")
+                    .classList.remove("hidden");
+
+            } else {
+
+                // kembali ke soal
+                document.querySelector(".content").style.display = "block";
+            }
         }
 
         function goPrev() {
