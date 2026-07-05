@@ -364,7 +364,10 @@
                     dan adab terhadap tetangga dalam kehidupan sehari-hari.
                 </p>
 
-                <iframe width="100%" height="400" src="https://www.youtube.com/embed/hNLbvM7c6lc" frameborder="0"
+                <iframe id="player" width="100%" height="400"
+                    src="https://www.youtube.com/embed/hNLbvM7c6lc?enablejsapi=1" title="YouTube video player"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowfullscreen>
                 </iframe>
             </section>
@@ -405,6 +408,35 @@
         showSlide(currentSlide);
     </script>
 
+    <script src="https://www.youtube.com/iframe_api"></script>
+
+    <script>
+        let player;
+
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player("player", {
+                events: {
+                    onStateChange: onPlayerStateChange
+                }
+            });
+        }
+
+        function onPlayerStateChange(event) {
+
+            // Saat video diputar
+            if (event.data === YT.PlayerState.PLAYING) {
+                pauseBGM();
+            }
+
+            // Saat video dijeda atau selesai
+            if (
+                event.data === YT.PlayerState.PAUSED ||
+                event.data === YT.PlayerState.ENDED
+            ) {
+                resumeBGM();
+            }
+        }
+    </script>
 </body>
 
 </html>
