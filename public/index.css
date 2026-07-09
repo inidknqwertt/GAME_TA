@@ -146,7 +146,7 @@ body {
 }
 
 .logout-icon img {
-    width: clamp(42px, 9vw, 58px);
+    width: clamp(70px, 12vw, 100px);
 }
 
 /* =========================
