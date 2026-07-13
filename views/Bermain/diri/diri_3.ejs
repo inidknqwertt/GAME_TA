@@ -187,6 +187,7 @@
 
         let isGameActive = true;
         let isGuideOpen = false;
+        let isFailed = false;
 
         let gameMode =
             sessionStorage.getItem("level3_mode") || "game";
@@ -448,6 +449,7 @@
 
             document.querySelector(".card")
                 .classList.add("hidden");
+            document.querySelector(".controls").style.display = "none";
 
         }
 
@@ -479,38 +481,62 @@
 
             isGuideOpen = false;
 
-            document.getElementById("guideCard")
-                .classList.add("hidden");
+            document.getElementById("guideCard").classList.add("hidden");
 
-            // jika masih game
-            if (gameMode === "game") {
+            // =========================
+            // JIKA SEDANG FAILED
+            // =========================
+            if (
+                isFailed &&
+                !document.getElementById("character").classList.contains("hidden")
+            ) {
 
-                document.querySelector(".card").style.display = "block";
-                document.querySelector(".controls").style.display = "flex";
+                document.querySelector(".card").style.display = "none";
+                document.querySelector(".controls").style.display = "none";
+
+                document.getElementById("quizBox").classList.add("hidden");
+                document.getElementById("character").classList.remove("hidden");
+                document.getElementById("nasihatBox").classList.remove("hidden");
+
                 return;
             }
 
-            // ===== TAMBAHAN =====
-            const endingVisible =
-                !document.getElementById("endingBox").classList.contains("hidden");
-
-            if (endingVisible) {
+            // =========================
+            // JIKA ENDING
+            // =========================
+            if (!document.getElementById("endingBox").classList.contains("hidden")) {
                 document.getElementById("endingBox").classList.remove("hidden");
                 return;
             }
-            // ====================
 
+            // =========================
+            // JIKA NASIHAT
+            // =========================
             if (isNasihat) {
+
+                document.getElementById("quizBox").classList.add("hidden");
 
                 document.getElementById("character").classList.remove("hidden");
                 document.getElementById("nasihatBox").classList.remove("hidden");
-                document.getElementById("quizBox").classList.add("hidden");
 
-            } else {
+                return;
+            }
+
+            // =========================
+            // JIKA QUIZ
+            // =========================
+            if (gameMode === "quiz") {
 
                 document.getElementById("quizBox").classList.remove("hidden");
 
+                return;
             }
+
+            // =========================
+            // JIKA GAME
+            // =========================
+            document.querySelector(".card").style.display = "block";
+            document.querySelector(".controls").style.display = "flex";
         }
 
         // =========================
@@ -722,6 +748,7 @@
         }
 
         function tampilPlayerFailed() {
+            isFailed = true;
 
             // sembunyikan area game
             document.querySelector(".card").style.display = "none";
@@ -756,7 +783,10 @@
         // RESTART
         // =========================
         function restartGame() {
-
+            isFailed = false;
+            isNasihat = false;
+            isGuideOpen = false;
+            gameFinished = false;
             // STOP SEMUA AUDIO
             const audioSalah = document.getElementById("audioSalah");
             const audioBenar = document.getElementById("audioBenar");
@@ -792,10 +822,15 @@
 
             document.querySelector(".card").style.display = "block";
             document.querySelector(".card").classList.remove("hidden");
+            document.querySelector(".controls").style.display = "flex";
 
             document.getElementById("openGuide").style.display = "block";
 
-            spawnBalon();
+            clearTimeout(startGameTimeout);
+
+            startGameTimeout = setTimeout(() => {
+                spawnBalon();
+            }, 4000);
         }
 
         // =========================
@@ -1326,6 +1361,7 @@
 
             // Matikan semua proses game balon
             isGameActive = false;
+
             stopGameLoop();
 
             // Sembunyikan area game
@@ -1347,7 +1383,8 @@
 
             // Jalankan game balon seperti biasa
             isGameActive = true;
-
+            isNasihat = false;    // sekalian reset
+            isFailed = false;     // tambahkan ini
             // Tampilkan area game
             document.querySelector(".card").classList.remove("hidden");
 
