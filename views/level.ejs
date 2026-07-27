@@ -92,44 +92,6 @@
 
         document.getElementById("totalPoint").innerText = totalPoint;
         document.getElementById("maxPoint").innerText = maxPoint;
-
-        // =========================
-        // UNLOCK LEVEL
-        // =========================
-        const btn1 = document.getElementById("level1");
-        const btn2 = document.getElementById("level2");
-        const btn3 = document.getElementById("level3");
-
-        const level1Selesai =
-            sessionStorage.getItem(`level1_${kategori}`) === "true";
-
-        const level2Selesai =
-            sessionStorage.getItem(`level2_${kategori}`) === "true";
-
-        const level3Selesai =
-            sessionStorage.getItem(`level3_${kategori}`) === "true";
-
-        // Default
-        btn1.disabled = false;
-        btn2.disabled = true;
-        btn3.disabled = true;
-
-        // Jika level 1 selesai
-        if (level1Selesai) {
-            btn2.disabled = false;
-        }
-
-        // Jika level 2 selesai
-        if (level2Selesai) {
-            btn3.disabled = false;
-        }
-
-        // Jika level 3 selesai (ending)
-        if (level3Selesai) {
-            btn1.disabled = false;
-            btn2.disabled = false;
-            btn3.disabled = false;
-        }
     </script>
 </body>
 

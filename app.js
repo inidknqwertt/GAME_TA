@@ -9,31 +9,48 @@ const path = require('path'); // Modul pengelola path file/folder
 const app = express(); // untuk menjalankan web Express
 
 /* koneksi ke MySQL (pakai POOL biar tidak terputus saat idle) */
-const db = mysql.createPool({
-    host: 'thomas.proxy.rlwy.net',
+// const db = mysql.createPool({
+//     host: 'thomas.proxy.rlwy.net',
+//     user: 'root',
+//     password: 'NrtUjwvBwDRuVUQqQjksMucKCMUnZKCP',
+//     database: 'railway',
+//     port: 47016,
+//     ssl: {
+//         rejectUnauthorized: false
+//     },
+//     waitForConnections: true,
+//     connectionLimit: 10,
+//     queueLimit: 0,
+//     enableKeepAlive: true,
+//     keepAliveInitialDelay: 10000
+// });
+
+const db = mysql.createConnection({
+    host: 'localhost',
     user: 'root',
-    password: 'NrtUjwvBwDRuVUQqQjksMucKCMUnZKCP',
-    database: 'railway',
-    port: 47016,
-    ssl: {
-        rejectUnauthorized: false
-    },
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0,
-    enableKeepAlive: true,
-    keepAliveInitialDelay: 10000
+    password: '', // Kosongkan jika pakai XAMPP default
+    database: 'node_auth'
 });
 
 // Tes koneksi database (opsional, cuma buat memastikan konek pertama kali)
-db.getConnection((err, connection) => {
+// db.getConnection((err, connection) => {
+//     if (err) {
+//         console.error('Gagal konek ke MySQL:', err.message);
+//         return;
+//     }
+//     console.log('Terhubung ke Database MySQL!');
+//     connection.release(); // kembalikan koneksi ke pool
+// });
+
+db.connect((err) => {
     if (err) {
         console.error('Gagal konek ke MySQL:', err.message);
         return;
     }
+
     console.log('Terhubung ke Database MySQL!');
-    connection.release(); // kembalikan koneksi ke pool
 });
+
 // Setting Express & Middleware ( fungsi yang berada di tengah proses request dan response untuk melakukan pengecekan)
 // set EJS
 app.set('view engine', 'ejs');
