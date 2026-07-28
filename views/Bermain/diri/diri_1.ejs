@@ -21,6 +21,24 @@
         ⭐ <span id="point">0</span> / 2000
     </div>
 
+    <!-- =========================
+         ENDING
+    ========================== -->
+    <div id="endingBox" class="character hidden">
+
+        <img src="/CharMaterii.gif">
+
+        <div class="nasihat">
+
+            <p id="endingText"></p>
+
+            <button onclick="goHome()" class="next-level">
+                Kembali ke Home 🏠
+            </button>
+
+        </div>
+    </div>
+
     <!-- BUTTON PETUNJUK -->
     <!--Membuka petunjuk permainan.-->
     <button id="openGuide" class="guide-btn" onclick="openGuide()">
@@ -192,6 +210,105 @@
                 audio: "/Bermain/diri/satu/nasihat5.mp3"
             },
         ];
+
+        function semuaLevelSelesai() {
+            return (
+                sessionStorage.getItem("level1_diri") === "true" &&
+                sessionStorage.getItem("level2_diri") === "true" &&
+                sessionStorage.getItem("level3_diri") === "true"
+            );
+        }
+
+        function selesaiLevel1() {
+
+            sessionStorage.setItem("level1_diri", "true");
+
+            sessionStorage.removeItem("indexSoal");
+
+            if (semuaLevelSelesai()) {
+
+                cekEnding();
+
+            } else {
+
+                window.location.href = "/level/diri";
+
+            }
+
+        }
+
+        // =========================
+        // HOME
+        // =========================
+
+        function goHome() {
+
+            savePoint();
+
+            window.location.href = "/";
+
+        }
+
+        function cekEnding() {
+
+            // STOP AUDIO
+            const audioNasihat = document.getElementById("audioNasihat");
+            const audioBenar = document.getElementById("audioBenar");
+            const audioSalah = document.getElementById("audioSalah");
+
+            [audioNasihat, audioBenar, audioSalah].forEach(a => {
+                a.pause();
+                a.currentTime = 0;
+            });
+
+            savePoint();
+
+            const endingBox = document.getElementById("endingBox");
+            const endingText = document.getElementById("endingText");
+
+            // sembunyikan semua tampilan sebelumnya
+            document.querySelector(".content").style.display = "none";
+
+            document.getElementById("character")
+                .classList.add("hidden");
+
+            document.getElementById("nasihatBox")
+                .classList.add("hidden");
+
+            document.getElementById("guideCard")
+                .classList.add("hidden");
+
+            // tampilkan ending
+            endingBox.classList.remove("hidden");
+
+            if (point >= 1800) {
+
+                endingText.innerText =
+                    "Kamu selalu menghadirkan Allah dalam setiap pilihanmu. Kamu termasuk orang yang sangat layak menuju Surga🌿";
+
+            }
+
+            else if (point >= 1600) {
+
+                endingText.innerText =
+                    "Kamu sudah banyak melakukan kebaikan. Namun masih ada yang perlu diperbaiki. Kamu sudah dekat dengan Surga… teruskan🌙";
+
+            }
+
+            else if (point >= 1400) {
+
+                endingText.innerText =
+                    "Kamu sudah mulai berusaha menjadi lebih baik. Tapi belum konsisten sepenuhnya. Kamu sedang menuju Surga… tetap berjuang🌱";
+
+            }
+
+            else {
+
+                endingText.innerText =
+                    "Kamu masih sering lalai dalam pilihanmu. Yuk mulai perbaiki diri… Surga masih bisa kamu kejar🌱";
+
+            }
+        }
 
         // Fungsi untuk menampilkan soal ke halaman
         function renderSoal() {
@@ -374,9 +491,7 @@
                         sessionStorage.setItem("level1_diri", "true");
                         // Hapus index soal lama, level 1 selesai
                         sessionStorage.removeItem("indexSoal");
-                        // Pindah ke halaman level 2
-                        window.location.href =
-                            "/bermain/diri/2";
+                        selesaiLevel1();
                         //Lalu fungsi berhenti.
                         return;
                     }
@@ -440,7 +555,7 @@
                     } else {
 
                         document.getElementById('btnNext').innerText =
-                            "Lanjut ke Level 2 🚀";
+                            "Lanjut🚀";
                     }
 
                     // tampil nasihat
@@ -536,7 +651,7 @@
                 sessionStorage.setItem("level1_diri", "true");
 
                 sessionStorage.removeItem("indexSoal");
-                window.location.href = "/bermain/diri/2";
+                selesaiLevel1();
             }
         }
 

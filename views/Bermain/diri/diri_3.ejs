@@ -380,6 +380,29 @@
 
         player.style.left = posisi + "px";
 
+        function semuaLevelSelesai() {
+            return (
+                sessionStorage.getItem("level1_diri") === "true" &&
+                sessionStorage.getItem("level2_diri") === "true" &&
+                sessionStorage.getItem("level3_diri") === "true"
+            );
+        }
+
+        function selesaiLevel3() {
+
+            sessionStorage.setItem("level3_diri", "true");
+
+            if (semuaLevelSelesai()) {
+
+                cekEnding();
+
+            } else {
+
+                window.location.href = "/level/diri";
+
+            }
+
+        }
 
         // =========================
         // STOP LOOP
@@ -1027,7 +1050,8 @@
 
                     if (currentQuestion >= questions.length) {
 
-                        cekEnding();
+                        // cekEnding();
+                        selesaiLevel3();
 
                     } else {
 
@@ -1086,7 +1110,7 @@
 
                     if (currentQuestion === questions.length - 1) {
 
-                        nextBtn.innerText = "Ending 🏁";
+                        nextBtn.innerText = "Lanjut";
 
                     } else {
 
@@ -1156,7 +1180,8 @@
 
             if (currentQuestion >= questions.length) {
 
-                cekEnding();
+                // cekEnding();
+                selesaiLevel3();
 
             } else {
 

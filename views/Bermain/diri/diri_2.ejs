@@ -55,6 +55,24 @@
 
   </div>
 
+  <!-- =========================
+         ENDING
+    ========================== -->
+  <div id="endingBox" class="character hidden">
+
+    <img src="/CharMaterii.gif">
+
+    <div class="nasihat">
+
+      <p id="endingText"></p>
+
+      <button onclick="goHome()" class="next-level">
+        Kembali ke Home 🏠
+      </button>
+
+    </div>
+  </div>
+
   <!-- Container utama game -->
   <div id="game-container">
 
@@ -448,6 +466,99 @@
       }
 
       gameLoop();
+    }
+
+    function semuaLevelSelesai() {
+      return (
+        sessionStorage.getItem("level1_diri") === "true" &&
+        sessionStorage.getItem("level2_diri") === "true" &&
+        sessionStorage.getItem("level3_diri") === "true"
+      );
+    }
+
+    function selesaiLevel2() {
+
+      sessionStorage.setItem("level2_diri", "true");
+
+    }
+
+    function lanjutSetelahMenangLevel2() {
+
+      if (semuaLevelSelesai()) {
+
+        cekEnding();
+
+      } else {
+
+        window.location.href = "/level/diri";
+
+      }
+
+    }
+
+    function cekEnding() {
+
+      // hentikan game
+      playerFailed = true;
+      cancelAnimationFrame(gameAnimationId);
+
+      // stop backsound
+      const bgm = document.getElementById("bgm");
+      if (bgm) {
+        bgm.pause();
+        bgm.currentTime = 0;
+      }
+
+      // savePoint();
+
+      // sembunyikan popup menang
+      gameWinElement.style.display = "none";
+
+      // sembunyikan game
+      document.getElementById("game-container").style.display = "none";
+
+      document.getElementById("controls").style.display = "none";
+
+      document.getElementById("guideCard").classList.add("hidden");
+
+      // tampilkan ending
+      const endingBox = document.getElementById("endingBox");
+      const endingText = document.getElementById("endingText");
+
+      endingBox.classList.remove("hidden");
+
+      if (point >= 1800) {
+
+        endingText.innerText =
+          "Kamu selalu menghadirkan Allah dalam setiap pilihanmu. Kamu termasuk orang yang sangat layak menuju Surga🌿";
+
+      } else if (point >= 1600) {
+
+        endingText.innerText =
+          "Kamu sudah banyak melakukan kebaikan. Namun masih ada yang perlu diperbaiki. Kamu sudah dekat dengan Surga… teruskan🌙";
+
+      } else if (point >= 1400) {
+
+        endingText.innerText =
+          "Kamu sudah mulai berusaha menjadi lebih baik. Tapi belum konsisten sepenuhnya. Kamu sedang menuju Surga… tetap berjuang🌱";
+
+      } else {
+
+        endingText.innerText =
+          "Kamu masih sering lalai dalam pilihanmu. Yuk mulai perbaiki diri… Surga masih bisa kamu kejar🌱";
+
+      }
+
+    }
+
+    // =========================
+    // HOME
+    // =========================
+
+    function goHome() {
+
+      window.location.href = "/";
+
     }
 
     // Fungsi untuk membuat platform baru
@@ -1077,19 +1188,24 @@
         });
 
         // Menandai bahwa level 2 telah selesai
-        sessionStorage.setItem("level2_diri", "true");
-        // Mengupdate tampilan poin pada UI
+        // Tandai level selesai
+        selesaiLevel2();
+
+        // Update point di layar
         document.getElementById("point").innerText = point;
-        // Membuat isi popup kemenangan
+
+        // Popup kemenangan
         gameWinElement.innerHTML = `
-      <div>SELAMAT! 🎉</div>
-      <div style="margin-top:10px; font-size:28px;">
-        POINT: 200
-      </div>
-      <a href="/bermain/diri/3" class="next-btn">
-        Next
-      </a>
-    `;
+            <div>SELAMAT! 🎉</div>
+
+            <div style="margin-top:10px; font-size:28px;">
+                POINT: 200
+            </div>
+
+            <button class="next-btn" onclick="lanjutSetelahMenangLevel2()">
+                Lanjut
+            </button>
+        `;
       }
 
       // Menampilkan popup kemenangan
@@ -1482,10 +1598,6 @@
       // Tampilkan layar kemenangan
       gameWinElement.innerHTML = `
     <div>LEVEL 2 SUDAH SELESAI ✅</div>
-
-    <a href="/bermain/diri/3" class="next-btn">
-      Next
-    </a>
 
     <a href="/" class="next-btn" style="margin-top:10px;">
       Home
