@@ -693,6 +693,43 @@ TABLET
 
         border-radius: 10px;
     }
+
+    .character {
+        bottom: 5px;
+        right: 5px;
+    }
+
+    .character img {
+        width: 130px;
+    }
+
+    .nasihat {
+
+        bottom: 85px;
+
+        right: 135px;
+
+        width: 150px;
+
+        padding: 10px;
+
+        font-size: 14px;
+
+        line-height: 1.4;
+
+        border-radius: 12px;
+    }
+
+    .next-level {
+
+        padding: 8px;
+
+        font-size: 12px;
+    }
+
+    #isiNasihat h2 {
+        font-size: 16px;
+    }
 }
 
 @media (min-width: 1200px) {

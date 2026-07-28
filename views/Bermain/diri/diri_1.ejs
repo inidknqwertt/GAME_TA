@@ -671,6 +671,24 @@
             document.getElementById("guideCard")
                 .classList.add("hidden");
 
+            // CEK APAKAH SEDANG DI HALAMAN ENDING
+            if (!document.getElementById("endingBox").classList.contains("hidden")) {
+
+                // Tetap tampilkan ending
+                document.querySelector(".content").style.display = "none";
+
+                document.getElementById("character")
+                    .classList.add("hidden");
+
+                document.getElementById("nasihatBox")
+                    .classList.add("hidden");
+
+                document.getElementById("endingBox")
+                    .classList.remove("hidden");
+
+                return;
+            }
+
             if (sedangNasihat) {
 
                 // kembali ke tampilan nasihat

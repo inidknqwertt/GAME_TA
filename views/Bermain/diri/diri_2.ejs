@@ -936,19 +936,20 @@
 
     //Menutup halaman petunjuk dan kembali ke game.
     function closeGuide() {
-      // Menyembunyikan kartu petunjuk
+
       document.getElementById("guideCard")
         .classList.add("hidden");
 
-      // Menampilkan kembali area permainan
-      document.getElementById("game-container")
-        .style.display = "block";
+      if (!document.getElementById("endingBox").classList.contains("hidden")) {
+        document.getElementById("game-container").style.display = "none";
+        document.getElementById("controls").style.display = "none";
+        return;
+      }
 
-      // Menampilkan kembali tombol kontrol
-      document.getElementById("controls")
-        .style.display = "flex";
+      document.getElementById("game-container").style.display = "block";
+      document.getElementById("controls").style.display = "flex";
     }
-
+    
     // Fungsi untuk mengecek apakah karakter sudah menyentuh garis finish
     function checkFinishCollision() {
       // Jika objek finishLine belum ada, hentikan fungsi
