@@ -5,18 +5,18 @@ const express = require('express'); // Framework untuk membuat server web
 const mysql = require('mysql2'); // Modul koneksi ke database MySQL
 const bcrypt = require('bcrypt'); // Modul enkripsi password
 const session = require('express-session'); // Modul pengelola session login
+const MySQLStore = require('express-mysql-session')(session); // Session store ke database
 const path = require('path'); // Modul pengelola path file/folder
 const app = express(); // untuk menjalankan web Express
 
 /* =========================
    KONEKSI DATABASE
    ========================= */
-// Jika pakai Vercel + TiDB Cloud, gunakan env variables
-// Jika local, gunakan XAMPP localhost
 let db;
+let dbSession;
 
 if (process.env.DB_HOST) {
-    // Vercel / TiDB Cloud (pool agar koneksi tidak terputus)
+    // Vercel / TiDB Cloud
     db = mysql.createPool({
         host: process.env.DB_HOST,
         user: process.env.DB_USER,
@@ -28,6 +28,7 @@ if (process.env.DB_HOST) {
         connectionLimit: 10,
         queueLimit: 0
     });
+    dbSession = db;
     console.log('Terhubung ke TiDB Cloud!');
 } else {
     // Local (XAMPP)
@@ -37,6 +38,7 @@ if (process.env.DB_HOST) {
         password: '',
         database: 'node_auth'
     });
+    dbSession = db;
 
     db.connect((err) => {
         if (err) {
@@ -47,22 +49,39 @@ if (process.env.DB_HOST) {
     });
 }
 
-// Setting Express & Middleware ( fungsi yang berada di tengah proses request dan response untuk melakukan pengecekan)
-// set EJS
+// Session store - simpan session ke database
+const sessionStore = new MySQLStore({
+    clearExpired: true,
+    checkExpirationInterval: 900000,
+    expiration: 86400000,
+    createDatabaseTable: true,
+    schema: {
+        tableName: 'sessions',
+        columnNames: {
+            session_id: 'session_id',
+            expires: 'expires',
+            data: 'data'
+        }
+    }
+}, dbSession);
+
+// Setting Express & Middleware
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// ambil data dari form
 app.use(express.urlencoded({ extended: false }));
-
-// membaca data JSON dari fetch
 app.use(express.json());
 
-/* ✅ WAJIB: SESSION */
+/* ✅ WAJIB: SESSION - simpan ke database */
 app.use(session({
     secret: process.env.SESSION_SECRET || 'rahasia_yang_penting_super_aman',
     resave: false,
-    saveUninitialized: true
+    saveUninitialized: false,
+    store: sessionStore,
+    cookie: {
+        secure: false, // false untuk local, true untuk HTTPS (Vercel)
+        maxAge: 86400000
+    }
 }));
 
 // akses file static

@@ -1,13 +1,15 @@
 const express = require('express');
-const mysql = require('mysql2/promise');
+const mysql = require('mysql2');
+const mysqlPromise = require('mysql2/promise');
 const bcrypt = require('bcrypt');
 const session = require('express-session');
+const MySQLStore = require('express-mysql-session')(session);
 const path = require('path');
 
 const app = express();
 
-// MySQL connection (TiDB Cloud via env variables)
-const db = mysql.createPool({
+// MySQL connection untuk query (promise-based)
+const db = mysqlPromise.createPool({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
@@ -19,6 +21,35 @@ const db = mysql.createPool({
     queueLimit: 0
 });
 
+// MySQL connection untuk session store (callback-based)
+const dbSession = mysql.createPool({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    port: parseInt(process.env.DB_PORT || '4000'),
+    ssl: { rejectUnauthorized: true },
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+});
+
+// Session store - simpan session ke database
+const sessionStore = new MySQLStore({
+    clearExpired: true,
+    checkExpirationInterval: 900000,
+    expiration: 86400000,
+    createDatabaseTable: true,
+    schema: {
+        tableName: 'sessions',
+        columnNames: {
+            session_id: 'session_id',
+            expires: 'expires',
+            data: 'data'
+        }
+    }
+}, dbSession);
+
 // Setting Express & Middleware
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '..', 'views'));
@@ -29,7 +60,12 @@ app.use(express.json());
 app.use(session({
     secret: process.env.SESSION_SECRET || 'rahasia_yang_penting_super_aman',
     resave: false,
-    saveUninitialized: true
+    saveUninitialized: false,
+    store: sessionStore,
+    cookie: {
+        secure: true,
+        maxAge: 86400000
+    }
 }));
 
 // Static files - public folder
