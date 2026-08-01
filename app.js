@@ -8,48 +8,44 @@ const session = require('express-session'); // Modul pengelola session login
 const path = require('path'); // Modul pengelola path file/folder
 const app = express(); // untuk menjalankan web Express
 
-/* koneksi ke MySQL (pakai POOL biar tidak terputus saat idle) */
-// const db = mysql.createPool({
-//     host: 'thomas.proxy.rlwy.net',
-//     user: 'root',
-//     password: 'NrtUjwvBwDRuVUQqQjksMucKCMUnZKCP',
-//     database: 'railway',
-//     port: 47016,
-//     ssl: {
-//         rejectUnauthorized: false
-//     },
-//     waitForConnections: true,
-//     connectionLimit: 10,
-//     queueLimit: 0,
-//     enableKeepAlive: true,
-//     keepAliveInitialDelay: 10000
-// });
+/* =========================
+   KONEKSI DATABASE
+   ========================= */
+// Jika pakai Vercel + TiDB Cloud, gunakan env variables
+// Jika local, gunakan XAMPP localhost
+let db;
 
-const db = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: '', // Kosongkan jika pakai XAMPP default
-    database: 'node_auth'
-});
+if (process.env.DB_HOST) {
+    // Vercel / TiDB Cloud (pool agar koneksi tidak terputus)
+    db = mysql.createPool({
+        host: process.env.DB_HOST,
+        user: process.env.DB_USER,
+        password: process.env.DB_PASSWORD,
+        database: process.env.DB_NAME,
+        port: parseInt(process.env.DB_PORT || '4000'),
+        ssl: { rejectUnauthorized: true },
+        waitForConnections: true,
+        connectionLimit: 10,
+        queueLimit: 0
+    });
+    console.log('Terhubung ke TiDB Cloud!');
+} else {
+    // Local (XAMPP)
+    db = mysql.createConnection({
+        host: 'localhost',
+        user: 'root',
+        password: '',
+        database: 'node_auth'
+    });
 
-// Tes koneksi database (opsional, cuma buat memastikan konek pertama kali)
-// db.getConnection((err, connection) => {
-//     if (err) {
-//         console.error('Gagal konek ke MySQL:', err.message);
-//         return;
-//     }
-//     console.log('Terhubung ke Database MySQL!');
-//     connection.release(); // kembalikan koneksi ke pool
-// });
-
-db.connect((err) => {
-    if (err) {
-        console.error('Gagal konek ke MySQL:', err.message);
-        return;
-    }
-
-    console.log('Terhubung ke Database MySQL!');
-});
+    db.connect((err) => {
+        if (err) {
+            console.error('Gagal konek ke MySQL:', err.message);
+            return;
+        }
+        console.log('Terhubung ke Database MySQL Local!');
+    });
+}
 
 // Setting Express & Middleware ( fungsi yang berada di tengah proses request dan response untuk melakukan pengecekan)
 // set EJS
@@ -137,73 +133,26 @@ app.get('/register', (req, res) => {
 
 //memproses data register yang dikirim user
 //post Mengirim data ke server 
-app.post('/register', (req, res) => {
-
-    // Mengambil data dari body
+app.post('/register', async (req, res) => {
     const { username, email, password } = req.body;
 
-    // Mengecek apakah email sudah ada di database
-    db.query(
-        //Ambil semua data dari tabel users yang emailnya sama dengan email yang dimasukkan user.
-        'SELECT * FROM users WHERE email = ?',
-        [email], // nilai email menggantikan tanda ?
-        async (err, results) => {
+    try {
+        // Cek apakah email sudah ada
+        const [existing] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
 
-            // Jika query ke database gagal, tampilkan halaman register dengan pesan error.
-            if (err) {
-                return res.render('register', {
-                    error: 'Terjadi kesalahan!'
-                });
-            }
-
-            // Jika email ditemukan (sudah terdaftar)
-            //Jika hasil query lebih dari 0, berarti email sudah ada.
-            if (results.length > 0) {
-                return res.render('register', {
-                    error: 'Hmm... email ini sudah terdaftar.'
-                });
-            }
-
-            try {
-
-                // Mengenkripsi password menggunakan bcrypt
-                // angka 10 adalah salt rounds
-                const hashedPassword = await bcrypt.hash(password, 10);
-
-                // Menyimpan data user baru ke database
-                db.query(
-                    'INSERT INTO users (username, email, password) VALUES (?, ?, ?)',
-
-                    // Data yang akan dimasukkan
-                    [username, email, hashedPassword],
-
-                    // Callback setelah proses insert
-                    (err) => {
-
-                        // Jika gagal menyimpan data
-                        if (err) {
-                            return res.render('register', {
-                                error: 'Gagal membuat akun!'
-                            });
-                        }
-
-                        // Jika berhasil, dia ke halaman login
-                        // dengan parameter success= yang akan muncul notif berhasil
-                        res.redirect('/login?success=register');
-                    }
-                );
-
-            } catch {
-
-                // Jika terjadi error saat hashing password
-                res.render('register', {
-                    error: 'Terjadi kesalahan saat mendaftar!'
-                });
-
-            }
-
+        if (existing.length > 0) {
+            return res.render('register', { error: 'Hmm... email ini sudah terdaftar.' });
         }
-    );
+
+        // Hash password lalu simpan
+        const hashedPassword = await bcrypt.hash(password, 10);
+        await db.query('INSERT INTO users (username, email, password) VALUES (?, ?, ?)', [username, email, hashedPassword]);
+
+        res.redirect('/login?success=register');
+    } catch (err) {
+        console.error(err);
+        res.render('register', { error: 'Gagal membuat akun!' });
+    }
 });
 
 
@@ -222,58 +171,34 @@ app.get('/login', (req, res) => {
 
 //memproses data login yang dikirim user
 //post Mengirim data ke server 
-app.post('/login', (req, res) => {
-
-    // Mengambil data email dan password dari form yang dikirim user
+app.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
-    // Mencari user di database berdasarkan email
-    db.query(
-        'SELECT * FROM users WHERE email = ?',
-        [email],
+    try {
+        const [results] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
 
-        // Callback setelah query selesai dijalankan
-        async (err, results) => {
-
-            // Jika terjadi error database
-            // ATAU email tidak ditemukan
-            if (err || results.length === 0) {
-
-                // Kembali ke halaman login dengan pesan error
-                return res.render('login', {
-                    error: 'Hmm siapa ya? Maaf akun tidak ditemukan.'
-                });
-            }
-
-            // Mengambil data user pertama yang ditemukan
-            const user = results[0];
-
-            // Membandingkan password input user
-            // dengan password hash yang tersimpan di database
-            const match = await bcrypt.compare(password, user.password);
-
-            // Jika password tidak cocok
-            if (!match) {
-
-                // Tampilkan kembali halaman login
-                // dengan pesan password salah
-                return res.render('login', {
-                    error: 'Password Salah!'
-                });
-            }
-
-            // Jika login berhasil
-            // Simpan data user ke session
-            req.session.user = {
-                id: user.id,
-                username: user.username,
-                email: user.email
-            };
-
-            // Redirect ke halaman utama (/)
-            res.redirect('/');
+        if (results.length === 0) {
+            return res.render('login', { error: 'Hmm siapa ya? Maaf akun tidak ditemukan.' });
         }
-    );
+
+        const user = results[0];
+        const match = await bcrypt.compare(password, user.password);
+
+        if (!match) {
+            return res.render('login', { error: 'Password Salah!' });
+        }
+
+        req.session.user = {
+            id: user.id,
+            username: user.username,
+            email: user.email
+        };
+
+        res.redirect('/');
+    } catch (err) {
+        console.error(err);
+        res.render('login', { error: 'Terjadi kesalahan!' });
+    }
 });
 
 
@@ -338,149 +263,62 @@ app.get('/level/:kategori', isLogin, (req, res) => {
    SIMPAN SCORE PEMBINAAN DIRI
 ========================= */
 //post Mengirim data ke server 
-app.post('/save-score/diri', isLogin, (req, res) => {
-
-    // Mengubah score menjadi integer
+app.post('/save-score/diri', isLogin, async (req, res) => {
     const score = parseInt(req.body.score);
-    const level = req.body.level; //Ambil nilai req.body.level
+    const level = req.body.level;
 
-    // Mengecek apakah nilai score BUKAN angka/string(NaN = Not a Number)
     if (isNaN(score)) {
-
-        // Menghentikan proses fungsi saat ini karena ada return
-        // dan mengirim respon JSON ke frontend
-        return res.json({
-
-            // Menandakan proses gagal
-            success: false,
-
-            // Pesan yang akan diterima frontend
-            message: 'Score tidak valid'
-        });
+        return res.json({ success: false, message: 'Score tidak valid' });
     }
 
-    db.query(
-        // Mengambil data history_diri milik user yang sedang login
-        'SELECT history_diri FROM users WHERE id = ?',
-        [req.session.user.id], (err, results) => {
-            // Menyiapkan array kosong untuk menyimpan riwayat level
-            let history = [];
+    try {
+        const [results] = await db.query('SELECT history_diri FROM users WHERE id = ?', [req.session.user.id]);
+        let history = [];
 
-            // Jika data user ditemukan DAN history_diri tidak kosong
-            if (results.length > 0 && results[0].history_diri) {
-                try {
-                    history = JSON.parse(results[0].history_diri);
-                } catch {
-                    history = [];
-                }
-            }
-
-            // Menghapus data level yang sama agar tidak terjadi duplikasi
-            history = history.filter(h => h.level !== level);
-
-            // Menambahkan level terbaru yang baru saja diselesaikan user
-            history.push({
-                level: level,
-            });
-
-            // Menyimpan score terbaru dan history terbaru ke database
-            db.query(
-                `
-                UPDATE users 
-                SET score_pembinaan_diri = ?, history_diri = ?
-                WHERE id = ?
-                `,
-                [
-                    score, //poin yang di dapatkan user
-
-                    // Mengubah array history menjadi JSON string
-                    // agar bisa disimpan ke database
-                    JSON.stringify(history),
-
-                    //Ini mengambil ID user yang sedang login
-                    req.session.user.id
-                ],
-
-                // Callback (setelah proses UPDATE selesai
-                (err) => {
-                    // Jika terjadi error saat update database
-                    if (err) {
-                        // Menampilkan error di terminal
-                        console.error(err);
-
-                        // Mengirim respon gagal ke frontend
-                        return res.json({ success: false });
-                    }
-
-                    // Jika update berhasil
-                    // kirim respon sukses ke frontend BUKAN Menampilkan
-                    res.json({ success: true });
-                }
-            );
+        if (results.length > 0 && results[0].history_diri) {
+            try { history = JSON.parse(results[0].history_diri); } catch { history = []; }
         }
-    );
+
+        history = history.filter(h => h.level !== level);
+        history.push({ level });
+
+        await db.query('UPDATE users SET score_pembinaan_diri = ?, history_diri = ? WHERE id = ?', [score, JSON.stringify(history), req.session.user.id]);
+        res.json({ success: true });
+    } catch (err) {
+        console.error(err);
+        res.json({ success: false });
+    }
 });
 
 /* =========================
    SIMPAN SCORE SOSIAL
 ========================= */
 
-app.post('/save-score/sosial', isLogin, (req, res) => {
-
+app.post('/save-score/sosial', isLogin, async (req, res) => {
     const score = parseInt(req.body.score);
     const level = req.body.level;
+
     if (isNaN(score)) {
-        return res.json({
-            success: false,
-            message: 'Score tidak valid'
-        });
+        return res.json({ success: false, message: 'Score tidak valid' });
     }
 
-    db.query(
-        'SELECT history_sosial FROM users WHERE id = ?',
-        [req.session.user.id],
-        (err, results) => {
+    try {
+        const [results] = await db.query('SELECT history_sosial FROM users WHERE id = ?', [req.session.user.id]);
+        let history = [];
 
-            let history = [];
-
-            if (results.length > 0 && results[0].history_sosial) {
-                try {
-                    history = JSON.parse(results[0].history_sosial);
-                } catch {
-                    history = [];
-                }
-            }
-
-            // hapus level yang sama (biar tidak dobel)
-            history = history.filter(h => h.level !== level);
-
-            // tambah data baru
-            history.push({
-                level: level,
-            });
-
-            db.query(
-                `
-                UPDATE users 
-                SET score_sosial = ?, history_sosial = ?
-                WHERE id = ?
-                `,
-                [
-                    score,
-                    JSON.stringify(history),
-                    req.session.user.id
-                ],
-                (err) => {
-                    if (err) {
-                        console.error(err);
-                        return res.json({ success: false });
-                    }
-
-                    res.json({ success: true });
-                }
-            );
+        if (results.length > 0 && results[0].history_sosial) {
+            try { history = JSON.parse(results[0].history_sosial); } catch { history = []; }
         }
-    );
+
+        history = history.filter(h => h.level !== level);
+        history.push({ level });
+
+        await db.query('UPDATE users SET score_sosial = ?, history_sosial = ? WHERE id = ?', [score, JSON.stringify(history), req.session.user.id]);
+        res.json({ success: true });
+    } catch (err) {
+        console.error(err);
+        res.json({ success: false });
+    }
 });
 
 /* =========================
