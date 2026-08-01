@@ -48,6 +48,22 @@
 
     </div>
 
+    <div id="endingBox" class="character hidden">
+
+        <img src="/CharMaterii.gif" alt="Karakter">
+
+        <div class="nasihat">
+
+            <p id="endingText"></p>
+
+            <button onclick="goHome()" class="next-level">
+                Selesai 🏠
+            </button>
+
+        </div>
+
+    </div>
+
     <button id="btnPrev" class="btn-prev" onclick="goPrev()">
         <img src="/prevv.png" alt="Prev">
     </button>
@@ -448,6 +464,79 @@
 
         });
 
+        function semuaLevelSelesai() {
+            return (
+                sessionStorage.getItem("level1_sosial") === "true" &&
+                sessionStorage.getItem("level2_sosial") === "true" &&
+                sessionStorage.getItem("level3_sosial") === "true"
+            );
+        }
+
+        function goHome() {
+              savePoint();
+            window.location.href = "/";
+        }
+
+        function showEnding() {
+
+            savePoint();
+
+            // Sembunyikan game
+            document.querySelector('.content')
+                .style.display = 'none';
+
+            // Sembunyikan karakter gagal
+            document.getElementById("character")
+                .classList.add("hidden");
+
+            document.getElementById("nasihatBox")
+                .classList.add("hidden");
+
+            // Ambil element ending
+            const endingBox =
+                document.getElementById("endingBox");
+
+            const endingText =
+                document.getElementById("endingText");
+
+            // Tampilkan ending
+            endingBox.classList.remove("hidden");
+
+            // =====================
+            // ENDING BERDASARKAN POINT
+            // =====================
+
+            if (point >= 1000) {
+
+                endingText.innerText =
+                    "MasyaAllah… Kamu tidak hanya tahu kebaikan, tapi juga melakukannya dengan konsisten. 🤲 Kamu menjaga hubungan dengan sesama, membantu, dan menjauhi keburukan. 🌿 Kamu termasuk orang yang layak menjadi teladan dan menuju Surga.";
+
+            }
+            else if (point >= 850) {
+
+                endingText.innerText =
+                    "Kamu sudah mampu membedakan mana yang baik dan buruk dalam kehidupan sosial. Sikapmu membawa manfaat bagi orang lain. 🌙 Kamu sudah dekat dengan nilai-nilai penghuni Surga.";
+
+            }
+            else if (point >= 700) {
+
+                endingText.innerText =
+                    "Kamu sudah menunjukkan kepedulian terhadap orang lain. Tapi terkadang masih ragu dalam bersikap. 🌿 Teruslah belajar… kamu sedang menuju pribadi yang lebih baik.";
+
+            }
+            else if (point >= 500) {
+
+                endingText.innerText =
+                    "Kamu sudah mulai memahami mana yang baik dan buruk… Tapi dalam kehidupan sosial, kamu masih perlu belajar lebih banyak. 🌱 Perbaiki hubunganmu dengan sesama… karena itu jalan menuju Surga.";
+
+            }
+            else {
+
+                endingText.innerText =
+                    "Kamu masih perlu banyak belajar tentang kehidupan sosial. Terus perbaiki dirimu dan hubunganmu dengan sesama.";
+
+            }
+        }
         // ========================
         // CEK JAWABAN DRAG & DROP
         // ========================
@@ -646,7 +735,16 @@
                             "true"
                         );
 
-                        window.location.href = "/bermain/sosial/2";
+                        // reset progress level
+                        sessionStorage.removeItem("indexSoal_sosial");
+                        sessionStorage.removeItem("answered_sosial");
+                        sessionStorage.removeItem("drag_sudahDicek");
+
+                        if (semuaLevelSelesai()) {
+                            showEnding();
+                        } else {
+                            window.location.href = "/level/sosial";
+                        }
                     }
 
                 }, 1800);
@@ -695,7 +793,7 @@
             if (indexSoal < 4) {
                 btnNext.innerText = `Lanjut Soal ${indexSoal + 2} 🚀`;
             } else {
-                btnNext.innerText = "Lanjut Level 2 🚀";
+                btnNext.innerText = "Lanjut🚀";
             }
 
             document.querySelector('.content').style.display = 'none';
@@ -766,9 +864,11 @@
                     "true"
                 );
 
-                // Lanjut ke level 2
-                window.location.href =
-                    "/bermain/sosial/2";
+                if (semuaLevelSelesai()) {
+                    showEnding();
+                } else {
+                    window.location.href = "/level/sosial";
+                }
             }
         }
 

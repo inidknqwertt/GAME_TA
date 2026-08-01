@@ -136,6 +136,22 @@
         <p id="textBenar"></p>
     </div>
 
+    <div id="endingBox" class="character hidden">
+
+        <img src="/CharMaterii.gif" alt="Karakter">
+
+        <div class="nasihat">
+
+            <p id="endingText"></p>
+
+            <button onclick="goHome()" class="next-level">
+                Selesai 🏠
+            </button>
+
+        </div>
+
+    </div>
+
     <audio id="bgm" autoplay loop>
         <source src="/audio/backsound.mp3" type="audio/mpeg">
     </audio>
@@ -336,7 +352,67 @@
 
         ];
 
+        function semuaLevelSelesai() {
+            return (
+                sessionStorage.getItem("level1_sosial") === "true" &&
+                sessionStorage.getItem("level2_sosial") === "true" &&
+                sessionStorage.getItem("level3_sosial") === "true"
+            );
+        }
 
+        function showEnding() {
+
+            savePoint();
+
+            document.querySelector('.content')
+                .style.display = 'none';
+
+            const endingBox =
+                document.getElementById("endingBox");
+
+            const endingText =
+                document.getElementById("endingText");
+
+            endingBox.classList.remove("hidden");
+
+            if (point >= 1000) {
+
+                endingText.innerText =
+                    "MasyaAllah… Kamu tidak hanya tahu kebaikan, tapi juga melakukannya dengan konsisten. 🤲 Kamu menjaga hubungan dengan sesama, membantu, dan menjauhi keburukan. 🌿 Kamu termasuk orang yang layak menjadi teladan dan menuju Surga.";
+
+            }
+            else if (point >= 850) {
+
+                endingText.innerText =
+                    "Kamu sudah mampu membedakan mana yang baik dan buruk dalam kehidupan sosial. Sikapmu membawa manfaat bagi orang lain. 🌙 Kamu sudah dekat dengan nilai-nilai penghuni Surga.";
+
+            }
+            else if (point >= 700) {
+
+                endingText.innerText =
+                    "Kamu sudah menunjukkan kepedulian terhadap orang lain. Tapi terkadang masih ragu dalam bersikap. 🌿 Teruslah belajar… kamu sedang menuju pribadi yang lebih baik.";
+
+            }
+            else if (point >= 500) {
+
+                endingText.innerText =
+                    "Kamu sudah mulai memahami mana yang baik dan buruk… Tapi dalam kehidupan sosial, kamu masih perlu belajar lebih banyak. 🌱 Perbaiki hubunganmu dengan sesama… karena itu jalan menuju Surga.";
+
+            }
+            else {
+
+                endingText.innerText =
+                    "Kamu masih perlu banyak belajar tentang kehidupan sosial. Terus perbaiki dirimu dan hubunganmu dengan sesama.";
+
+            }
+        }
+
+        function goHome() {
+
+            savePoint();
+
+            window.location.href = "/";
+        }
         // =========================
         // DRAG DROP
         // =========================
@@ -819,7 +895,7 @@
         <div class="result-center">
             <h1 class="result-title">SELAMAT! 🎉</h1>
             <div class="result-point">POINT BERTAMBAH: 50</div>
-            <button onclick="lanjut()" class="next-btn">Next 🚀</button>
+            <button onclick="lanjut()" class="next-btn">Level 2 Selesai 🚀</button>
         </div>
     `;
         }
@@ -864,8 +940,14 @@
 
             savePoint();
 
-            window.location.href =
-                "/bermain/sosial/3";
+            sessionStorage.setItem("level2_sosial", "true");
+
+            if (semuaLevelSelesai()) {
+                showEnding();
+            } else {
+                window.location.href = "/level/sosial";
+            }
+
         }
 
         function mainLagi() {

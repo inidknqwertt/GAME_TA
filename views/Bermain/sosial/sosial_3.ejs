@@ -306,6 +306,14 @@
             }
         }
 
+        function semuaLevelSelesai() {
+            return (
+                sessionStorage.getItem("level1_sosial") === "true" &&
+                sessionStorage.getItem("level2_sosial") === "true" &&
+                sessionStorage.getItem("level3_sosial") === "true"
+            );
+        }
+
         // =========================
         // UPDATE TAMPILAN POINT
         // =========================
@@ -516,11 +524,25 @@
                             levelSekarang
                         );
 
-                        showEnding();
+                        sessionStorage.setItem(
+                            "level3_sosial",
+                            "true"
+                        );
+
+                        if (semuaLevelSelesai()) {
+
+                            showEnding();
+
+                        } else {
+
+                            window.location.href = "/level/sosial";
+
+                        }
 
                     } else {
 
                         nextSoal();
+
                     }
                 };
 
@@ -826,24 +848,27 @@
         updatePoint();
 
         // Kalau semua soal sudah selesai
-        const selesai =
-            sessionStorage.getItem(
-                "level3_sosial"
-            );
-
-        if (selesai === "true") {
+        if (
+            sessionStorage.getItem("level3_sosial") === "true" &&
+            semuaLevelSelesai()
+        ) {
 
             showEnding();
 
         }
         else if (levelSekarang >= soalList.length) {
 
-            showEnding();
+            if (semuaLevelSelesai()) {
+                showEnding();
+            } else {
+                window.location.href = "/level/sosial";
+            }
 
         }
         else {
 
             nextSoal();
+
         }
     </script>
 
