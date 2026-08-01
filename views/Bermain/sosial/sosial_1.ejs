@@ -473,7 +473,7 @@
         }
 
         function goHome() {
-              savePoint();
+            savePoint();
             window.location.href = "/";
         }
 
@@ -972,14 +972,17 @@
 
             document.getElementById("guideCard").classList.add("hidden");
 
-            if (sedangNasihat) {
+            const endingVisible =
+                !document.getElementById("endingBox").classList.contains("hidden");
 
+            if (endingVisible) {
                 document.querySelector(".content").style.display = "none";
-
-            } else {
-
+            }
+            else if (sedangNasihat) {
+                document.querySelector(".content").style.display = "none";
+            }
+            else {
                 document.querySelector(".content").style.display = "block";
-
             }
         }
 

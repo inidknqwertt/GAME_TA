@@ -895,7 +895,7 @@
         <div class="result-center">
             <h1 class="result-title">SELAMAT! 🎉</h1>
             <div class="result-point">POINT BERTAMBAH: 50</div>
-            <button onclick="lanjut()" class="next-btn">Level 2 Selesai 🚀</button>
+            <button onclick="lanjut()" class="next-btn">Lanjut/Lihat Ending 🚀</button>
         </div>
     `;
         }
@@ -980,13 +980,16 @@
 
         function closeGuide() {
 
-            // sembunyikan petunjuk
-            document.getElementById("guideCard")
-                .classList.add("hidden");
+            document.getElementById("guideCard").classList.add("hidden");
 
-            // tampilkan lagi card soal
-            document.querySelector(".content")
-                .style.display = "block";
+            const endingVisible =
+                !document.getElementById("endingBox").classList.contains("hidden");
+
+            if (endingVisible) {
+                document.querySelector(".content").style.display = "none";
+            } else {
+                document.querySelector(".content").style.display = "block";
+            }
         }
 
         // function untuk tampil notif benar
