@@ -15,7 +15,7 @@ const db = mysqlPromise.createPool({
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
     port: parseInt(process.env.DB_PORT || '4000'),
-    ssl: { rejectUnauthorized: true },
+    ssl: { rejectUnauthorized: false },
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0
@@ -28,7 +28,7 @@ const dbSession = mysql.createPool({
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
     port: parseInt(process.env.DB_PORT || '4000'),
-    ssl: { rejectUnauthorized: true },
+    ssl: { rejectUnauthorized: false },
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0
@@ -63,8 +63,9 @@ app.use(session({
     saveUninitialized: false,
     store: sessionStore,
     cookie: {
-        secure: true,
-        maxAge: 86400000
+        secure: false,
+        maxAge: 86400000,
+        sameSite: 'lax'
     }
 }));
 
